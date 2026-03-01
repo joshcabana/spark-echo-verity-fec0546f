@@ -1,0 +1,57 @@
+name: verity-ci
+
+on:
+  push:
+    branches:
+      - main
+      - "codex/**"
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      # Canonical defaults for static CI gates (build/lint/test/typecheck/alignment).
+      VITE_SUPABASE_PROJECT_ID: itdzdyhdkbcxbqgukzis
+      VITE_SUPABASE_URL: https://itdzdyhdkbcxbqgukzis.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ci_placeholder_anon_key
+      VITE_REQUIRE_PHONE_VERIFICATION: "false"
+      VITE_REQUIRE_GOOGLE_AUTH: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Project alignment
+        run: npm run check:project-alignment
+
+      - name: No hardcoded Supabase credentials
+        run: npm run check:no-hardcoded-supabase
+
+      - name: Auth settings (if secrets provided)
+        if: ${{ secrets.VITE_SUPABASE_URL != '' && secrets.VITE_SUPABASE_PUBLISHABLE_KEY != '' }}
+        env:
+          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run check:auth-settings
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test -- --run
+
+      - name: Build
+        run: npm run build
+
+      - name: Typecheck
+        run: npx tsc -b
