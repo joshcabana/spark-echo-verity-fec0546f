@@ -8,7 +8,11 @@ const REQUIRED_ENV_KEYS = [
 ];
 
 const repoRoot = process.cwd();
-const envPath = path.join(repoRoot, ".env");
+const envPaths = [
+  path.join(repoRoot, ".env"),
+  path.join(repoRoot, ".env.production"),
+  path.join(repoRoot, ".env.local"),
+];
 
 const parseDotEnv = (filePath) => {
   if (!fs.existsSync(filePath)) return {};
@@ -31,7 +35,10 @@ const parseDotEnv = (filePath) => {
   return entries;
 };
 
-const dotEnvValues = parseDotEnv(envPath);
+const dotEnvValues = envPaths.reduce(
+  (acc, filePath) => ({ ...acc, ...parseDotEnv(filePath) }),
+  {},
+);
 
 const missingKeys = REQUIRED_ENV_KEYS.filter((key) => {
   const runtimeValue = process.env[key];

@@ -2,6 +2,12 @@
 set -euo pipefail
 
 ENV_FILE="${1:-.env}"
+ENV_FALLBACK_FILE="${2:-.env.production}"
+
+ENV_FILES=("$ENV_FILE")
+if [[ "$ENV_FALLBACK_FILE" != "$ENV_FILE" ]]; then
+  ENV_FILES+=("$ENV_FALLBACK_FILE")
+fi
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "jq is required for this script" >&2
@@ -17,21 +23,25 @@ read_env_var() {
     echo "$env_val"
     return 0
   fi
-  # Fall back to reading from .env file if accessible
-  if [[ ! -f "$ENV_FILE" ]]; then
-    echo ""
+  # Fall back to reading from env files if accessible
+  local env_file
+  for env_file in "${ENV_FILES[@]}"; do
+    if [[ ! -f "$env_file" ]]; then
+      continue
+    fi
+    local line
+    line="$(grep -E "^${key}=" "$env_file" | tail -n 1 || true)"
+    if [[ -z "$line" ]]; then
+      continue
+    fi
+    local value="${line#*=}"
+    value="${value%\"}"
+    value="${value#\"}"
+    echo "$value"
     return 0
-  fi
-  local line
-  line="$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 || true)"
-  if [[ -z "$line" ]]; then
-    echo ""
-    return 0
-  fi
-  local value="${line#*=}"
-  value="${value%\"}"
-  value="${value#\"}"
-  echo "$value"
+  done
+
+  echo ""
 }
 
 SUPA_URL="$(read_env_var "VITE_SUPABASE_URL")"
@@ -44,7 +54,7 @@ REQUIRE_GOOGLE="${REQUIRE_GOOGLE_FLAG:-false}"
 REQUIRE_GOOGLE_LOWER="$(echo "$REQUIRE_GOOGLE" | tr '[:upper:]' '[:lower:]')"
 
 if [[ -z "$SUPA_URL" || -z "$ANON_KEY" ]]; then
-  echo "Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY in $ENV_FILE" >&2
+  echo "Missing VITE_SUPABASE_URL or VITE_SUPABASE_PUBLISHABLE_KEY in env context or ${ENV_FILES[*]}" >&2
   exit 1
 fi
 

@@ -4,6 +4,12 @@ set -euo pipefail
 CANONICAL_PROJECT_ID="${1:-itdzdyhdkbcxbqgukzis}"
 ENV_FILE="${2:-.env}"
 SUPABASE_CONFIG_FILE="${3:-supabase/config.toml}"
+ENV_FALLBACK_FILE="${4:-.env.production}"
+
+ENV_FILES=("$ENV_FILE")
+if [[ "$ENV_FALLBACK_FILE" != "$ENV_FILE" ]]; then
+  ENV_FILES+=("$ENV_FALLBACK_FILE")
+fi
 
 read_env_var() {
   local key="$1"
@@ -14,22 +20,26 @@ read_env_var() {
     return 0
   fi
 
-  if [[ ! -f "$ENV_FILE" ]]; then
-    echo ""
-    return 0
-  fi
+  local env_file
+  for env_file in "${ENV_FILES[@]}"; do
+    if [[ ! -f "$env_file" ]]; then
+      continue
+    fi
 
-  local line
-  line="$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 || true)"
-  if [[ -z "$line" ]]; then
-    echo ""
-    return 0
-  fi
+    local line
+    line="$(grep -E "^${key}=" "$env_file" | tail -n 1 || true)"
+    if [[ -z "$line" ]]; then
+      continue
+    fi
 
-  local value="${line#*=}"
-  value="${value%\"}"
-  value="${value#\"}"
-  echo "$value"
+    local value="${line#*=}"
+    value="${value%\"}"
+    value="${value#\"}"
+    echo "$value"
+    return 0
+  done
+
+  echo ""
 }
 
 if [[ ! -f "$SUPABASE_CONFIG_FILE" ]]; then
@@ -44,12 +54,12 @@ CONFIG_PROJECT_ID="$(
 )"
 
 if [[ -z "$ENV_PROJECT_ID" ]]; then
-  echo "Missing VITE_SUPABASE_PROJECT_ID in env context or $ENV_FILE" >&2
+  echo "Missing VITE_SUPABASE_PROJECT_ID in env context or ${ENV_FILES[*]}" >&2
   exit 1
 fi
 
 if [[ -z "$ENV_URL" ]]; then
-  echo "Missing VITE_SUPABASE_URL in env context or $ENV_FILE" >&2
+  echo "Missing VITE_SUPABASE_URL in env context or ${ENV_FILES[*]}" >&2
   exit 1
 fi
 
