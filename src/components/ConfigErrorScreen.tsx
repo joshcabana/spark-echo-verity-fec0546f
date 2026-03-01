@@ -9,7 +9,7 @@ const ConfigErrorScreen = ({ missingKeys }: ConfigErrorScreenProps) => {
     <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
       <div className="w-full max-w-xl rounded-xl border border-destructive/40 bg-card p-8">
         <div className="mb-6 flex items-center justify-between gap-4">
-          <VerityLogo className="h-8 w-auto" linkTo="/" />
+          <VerityLogo className="h-8 w-auto" linkTo="" />
           <span className="text-xs uppercase tracking-wide text-destructive">Config Error</span>
         </div>
 
