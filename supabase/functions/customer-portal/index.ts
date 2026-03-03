@@ -54,19 +54,19 @@ serve(async (req) => {
 
     const { return_url } = await req.json().catch(() => ({ return_url: undefined }));
 
-    // Use stripe_customer_id from profile first, fall back to email lookup
+    // Use stripe_customer_id from user_payment_info first, fall back to email lookup
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
+    const { data: paymentInfo } = await supabaseAdmin
+      .from("user_payment_info")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
       .single();
 
-    let customerId = profile?.stripe_customer_id;
+    let customerId = paymentInfo?.stripe_customer_id;
 
     if (!customerId) {
       const customerEmail = user.email;
@@ -87,9 +87,8 @@ serve(async (req) => {
 
       // Cache for future lookups
       await supabaseAdmin
-        .from("profiles")
-        .update({ stripe_customer_id: customerId })
-        .eq("user_id", user.id);
+        .from("user_payment_info")
+        .upsert({ user_id: user.id, stripe_customer_id: customerId }, { onConflict: "user_id" });
     }
 
     const safeReturnUrl = resolveSafeReturnUrl(return_url, ALLOWED_ORIGINS);
