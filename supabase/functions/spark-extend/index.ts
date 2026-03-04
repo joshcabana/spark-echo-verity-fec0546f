@@ -59,22 +59,34 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Deduct tokens
+    // Determine token cost
     const tokenCost = days === 1 ? 1 : days === 3 ? 2 : 4;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("token_balance, subscription_tier")
+      .select("subscription_tier")
       .eq("user_id", user.id)
       .single();
 
     const isFreeWithPass = profile?.subscription_tier !== "free";
     const actualCost = isFreeWithPass ? 0 : tokenCost;
 
-    if (!isFreeWithPass && (profile?.token_balance || 0) < actualCost) {
-      return new Response(
-        JSON.stringify({ error: "Insufficient tokens" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    // Atomically deduct tokens via RPC (prevents race conditions)
+    if (actualCost > 0) {
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
+      const { error: deductErr } = await adminClient.rpc("deduct_tokens", {
+        p_user_id: user.id,
+        p_cost: actualCost,
+      });
+      if (deductErr) {
+        return new Response(
+          JSON.stringify({ error: "Insufficient tokens" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      await adminClient.from("token_transactions").insert({ user_id: user.id, amount: -actualCost, reason: `Spark extension: ${days} days` });
     }
 
     // Extend spark expiry
@@ -82,11 +94,6 @@ serve(async (req) => {
     const newExpiry = new Date(currentExpiry.getTime() + days * 24 * 60 * 60 * 1000);
 
     await supabase.from("sparks").update({ expires_at: newExpiry.toISOString() }).eq("id", spark_id);
-
-    if (actualCost > 0) {
-      await supabase.from("profiles").update({ token_balance: (profile?.token_balance || 0) - actualCost }).eq("user_id", user.id);
-      await supabase.from("token_transactions").insert({ user_id: user.id, amount: -actualCost, reason: `Spark extension: ${days} days` });
-    }
 
     return new Response(
       JSON.stringify({ success: true, new_expiry: newExpiry.toISOString(), tokens_spent: actualCost }),
