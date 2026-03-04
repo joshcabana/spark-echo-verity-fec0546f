@@ -100,6 +100,27 @@ const Lobby = () => {
     enabled: drops.length > 0,
   });
 
+  // Fetch matchmaking queue waiting counts for live drops
+  const liveDropIds = drops.filter((d) => d.status === "live").map((d) => d.id);
+  const { data: waitingCounts = {} } = useQuery({
+    queryKey: ["waiting-counts", liveDropIds.join(",")],
+    queryFn: async () => {
+      if (liveDropIds.length === 0) return {};
+      const { data, error } = await supabase
+        .from("matchmaking_queue")
+        .select("drop_id")
+        .in("drop_id", liveDropIds)
+        .eq("status", "waiting");
+      if (error) throw error;
+      const counts: Record<string, number> = {};
+      for (const id of liveDropIds) counts[id] = 0;
+      for (const row of data ?? []) counts[row.drop_id!] = (counts[row.drop_id!] || 0) + 1;
+      return counts;
+    },
+    enabled: liveDropIds.length > 0,
+    refetchInterval: 10000,
+  });
+
   // RSVP mutation
   const rsvpMutation = useMutation({
     mutationFn: async (dropId: string) => {
