@@ -1,37 +1,75 @@
 
 
-## Pull-to-Refresh for Lobby and Spark History
+## Phase 4: Spark Reflections DB, Chemistry Vault Items DB, Spark Reflection AI Edge Function, Text-Only Vault
 
-### Testing Note
-The skeleton loading states, data export, account deletion, and typing indicators all require an authenticated session to verify. You'll need to log in via the preview first, then I can run browser tests. The code for all of these is in place.
+### 1. Database Migrations
 
-### Pull-to-Refresh Plan
+**Table: `spark_reflections`**
+- `id` uuid PK default `gen_random_uuid()`
+- `call_id` uuid NOT NULL (references calls)
+- `user_id` uuid NOT NULL (the user who submitted the reflection)
+- `feeling_score` integer (1-5, "How did that feel?")
+- `liked_text` text ("What did you like?")
+- `next_time_text` text ("What would you try next time?")
+- `ai_reflection` text (Gemini-generated reflection)
+- `created_at` timestamptz default now()
+- UNIQUE(call_id, user_id)
+- RLS: user can insert/select/update own only
 
-Create a reusable `usePullToRefresh` hook and integrate it into Lobby and Spark History pages.
+**Table: `chemistry_vault_items`**
+- `id` uuid PK default `gen_random_uuid()`
+- `call_id` uuid NOT NULL
+- `user_id` uuid NOT NULL
+- `partner_user_id` uuid NOT NULL
+- `title` text
+- `highlights` jsonb default '[]'
+- `user_notes` text
+- `reflection_id` uuid (references spark_reflections)
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+- UNIQUE(call_id, user_id)
+- RLS: user can CRUD own only
 
-**1. Create `src/hooks/usePullToRefresh.ts`**
-- Custom hook that listens for touch events (`touchstart`, `touchmove`, `touchend`) on a ref element
-- Detects downward swipe when scrolled to top (scrollTop === 0)
-- Returns `{ pullDistance, isRefreshing, containerRef }` for UI binding
-- Triggers an `onRefresh` callback (returns Promise) when threshold is exceeded (e.g. 80px pull)
-- Sets `isRefreshing = true` while the refresh promise resolves
+### 2. Edge Function: `spark-reflection-ai`
 
-**2. Create `src/components/PullToRefreshIndicator.tsx`**
-- Small visual indicator: rotating `RefreshCw` icon + "Pull to refresh" / "Refreshing..." text
-- Positioned at top of scroll container, height driven by `pullDistance`
-- Animate spinner when `isRefreshing` is true
+New edge function that:
+1. Accepts `{ call_id, feeling_score, liked_text, next_time_text }` from authenticated user
+2. Verifies user is a participant in the call
+3. Calls Lovable AI (gemini-2.5-flash) with a system prompt to generate a short reflection: strengths, one improvement, suggested theme
+4. Inserts into `spark_reflections` table
+5. Auto-creates a `chemistry_vault_items` entry for this call+user
+6. Returns the AI reflection text
 
-**3. Edit `src/pages/Lobby.tsx`**
-- Wrap main content with the pull-to-refresh container ref
-- On refresh: invalidate `["drops"]`, `["my-rsvps"]`, `["rsvp-counts"]` queries
-- Show `PullToRefreshIndicator` above the drops list
+### 3. Update `SparkReflection.tsx`
 
-**4. Edit `src/pages/SparkHistory.tsx`**
-- Wrap main content with the pull-to-refresh container ref
-- On refresh: invalidate `["sparks"]` query
-- Show `PullToRefreshIndicator` above the sparks/vault content
+Currently shows hardcoded insights. Upgrade to:
+- Show post-session mini prompts: feeling score (1-5 stars), "What did you like?" textarea, "What would you try next time?" textarea
+- On submit: call `spark-reflection-ai` edge function
+- Display AI-generated reflection when returned
+- Keep "Continue" button behavior unchanged
+
+### 4. Update Vault Components
+
+**`ReplayVault.tsx`**: Switch from querying `chemistry_replays` to querying `chemistry_vault_items` joined with `spark_reflections`. Display text-only vault entries with partner names.
+
+**`ReplayCard.tsx`**: Show vault item title, AI reflection preview, user notes, and timestamps. No video references.
+
+### 5. Route + Config
+
+- Add `verify_jwt = false` for `spark-reflection-ai` in `supabase/config.toml`
+- No new routes needed (vault is already a tab in SparkHistory)
 
 ### Files
-- **Create**: `src/hooks/usePullToRefresh.ts`, `src/components/PullToRefreshIndicator.tsx`
-- **Edit**: `src/pages/Lobby.tsx`, `src/pages/SparkHistory.tsx`
+
+**Create:**
+- `supabase/functions/spark-reflection-ai/index.ts`
+
+**Edit:**
+- `src/components/call/SparkReflection.tsx` — interactive prompts + AI call
+- `src/components/vault/ReplayVault.tsx` — query `chemistry_vault_items`
+- `src/components/vault/ReplayCard.tsx` — display vault item data
+- `supabase/config.toml` — add function entry
+
+**DB Migration:**
+- Create `spark_reflections` and `chemistry_vault_items` tables with RLS
 

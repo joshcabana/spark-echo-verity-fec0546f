@@ -2,7 +2,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import PullToRefreshIndicator from "@/components/PullToRefreshIndicator";
 import SparkCard from "@/components/sparks/SparkCard";
 import SparkEmptyState from "@/components/sparks/SparkEmptyState";
 import SparkCardSkeleton from "@/components/sparks/SparkCardSkeleton";
@@ -31,7 +33,14 @@ interface SparkWithPartner {
 
 const SparkHistory = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [active, setActive] = useState<Filter>("All");
+
+  const { containerRef, pullDistance, isRefreshing } = usePullToRefresh({
+    onRefresh: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["sparks"] });
+    },
+  });
 
   const { data: sparks = [], isLoading: sparksLoading } = useQuery<SparkWithPartner[]>({
     queryKey: ["sparks", user?.id],
@@ -114,7 +123,7 @@ const SparkHistory = () => {
     });
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div ref={containerRef} className="min-h-screen bg-background pb-20 overflow-auto">
       <Tabs defaultValue="sparks" className="w-full">
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
           <div className="container max-w-2xl mx-auto px-5 pt-5 pb-4">
@@ -130,6 +139,7 @@ const SparkHistory = () => {
         </header>
 
         <main className="container max-w-2xl mx-auto px-5 pt-5">
+          <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
           <TabsContent value="sparks">
             <div className="flex gap-2 mb-4">
               {filters.map((f) => (

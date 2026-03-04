@@ -13,6 +13,8 @@ import DropCardSkeleton from "@/components/lobby/DropCardSkeleton";
 import DropsFilter, { type FilterOption } from "@/components/lobby/DropsFilter";
 import MatchmakingOverlay from "@/components/lobby/MatchmakingOverlay";
 import BottomNav from "@/components/BottomNav";
+import PullToRefreshIndicator from "@/components/PullToRefreshIndicator";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { isToday, isThisWeek } from "date-fns";
 import { toast } from "sonner";
 
@@ -268,8 +270,18 @@ const Lobby = () => {
 
   const nextRsvp = drops.find((d) => rsvps.includes(d.id));
 
+  const { containerRef, pullDistance, isRefreshing } = usePullToRefresh({
+    onRefresh: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["drops"] }),
+        queryClient.invalidateQueries({ queryKey: ["my-rsvps"] }),
+        queryClient.invalidateQueries({ queryKey: ["rsvp-counts"] }),
+      ]);
+    },
+  });
+
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div ref={containerRef} className="min-h-screen bg-background pb-20 overflow-auto">
       <header className="sticky top-0 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="container max-w-2xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -288,6 +300,7 @@ const Lobby = () => {
       </header>
 
       <main className="container max-w-2xl mx-auto px-5 pt-8">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
         {strictPhoneProviderBlocked && (
           <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
             Live Drops are temporarily paused because phone verification is required but the SMS provider is offline.
