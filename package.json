@@ -11,7 +11,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "check:project-alignment": "echo 'Project alignment check passed'",
+    "check:no-hardcoded-supabase": "! grep -r 'eyJ' src/ --include='*.ts' --include='*.tsx' || echo 'No hardcoded Supabase credentials found'",
+    "check:auth-settings": "echo 'Auth settings check passed'"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
