@@ -1,75 +1,75 @@
 
 
-## Phase 3: Green Room, Settings Page, Route Prefix Evaluation
+## Phase 4: Spark Reflections DB, Chemistry Vault Items DB, Spark Reflection AI Edge Function, Text-Only Vault
 
-### Route Prefix Decision: Keep Flat Routes
+### 1. Database Migrations
 
-Migrating to `/app/*` prefix would break existing links, bookmarks, the route test file, BottomNav paths, Lobby/LiveCall navigate calls, push notification URLs, and realtime callback URLs throughout the codebase. The benefit is purely cosmetic. **Decision: keep flat routes.** Add the two new pages at `/green-room` and `/settings`.
+**Table: `spark_reflections`**
+- `id` uuid PK default `gen_random_uuid()`
+- `call_id` uuid NOT NULL (references calls)
+- `user_id` uuid NOT NULL (the user who submitted the reflection)
+- `feeling_score` integer (1-5, "How did that feel?")
+- `liked_text` text ("What did you like?")
+- `next_time_text` text ("What would you try next time?")
+- `ai_reflection` text (Gemini-generated reflection)
+- `created_at` timestamptz default now()
+- UNIQUE(call_id, user_id)
+- RLS: user can insert/select/update own only
 
----
+**Table: `chemistry_vault_items`**
+- `id` uuid PK default `gen_random_uuid()`
+- `call_id` uuid NOT NULL
+- `user_id` uuid NOT NULL
+- `partner_user_id` uuid NOT NULL
+- `title` text
+- `highlights` jsonb default '[]'
+- `user_notes` text
+- `reflection_id` uuid (references spark_reflections)
+- `created_at` timestamptz default now()
+- `updated_at` timestamptz default now()
+- UNIQUE(call_id, user_id)
+- RLS: user can CRUD own only
 
-### 1. Green Room Page (`/green-room`)
+### 2. Edge Function: `spark-reflection-ai`
 
-Pre-call hardware check page. User navigates here before entering the Lobby (or as a pre-flight before joining a Drop).
+New edge function that:
+1. Accepts `{ call_id, feeling_score, liked_text, next_time_text }` from authenticated user
+2. Verifies user is a participant in the call
+3. Calls Lovable AI (gemini-2.5-flash) with a system prompt to generate a short reflection: strengths, one improvement, suggested theme
+4. Inserts into `spark_reflections` table
+5. Auto-creates a `chemistry_vault_items` entry for this call+user
+6. Returns the AI reflection text
 
-**Create `src/pages/GreenRoom.tsx`:**
-- Camera preview using `getUserMedia` (no Agora import — just native browser API)
-- Mic level meter via `AudioContext` + `AnalyserNode` (real-time volume bar)
-- Network quality indicator (simple `navigator.connection` check + fetch latency test to Supabase)
-- Lighting tips text ("Find good lighting, face a window")
-- "Anonymous filter ON (required pre-Spark)" indicator badge
-- "You can leave anytime" reassurance copy
-- "Enter Lobby" CTA button → navigates to `/lobby`
-- Optional: Guardian Net quick-add (link to `/drops/friendfluence`)
-- Uses Helmet for SEO title
-- BottomNav at bottom
-- Clean up `getUserMedia` stream on unmount
+### 3. Update `SparkReflection.tsx`
 
-**Route:** Protected (requires auth but not requireTrust — users should be able to test hardware before completing verification).
+Currently shows hardcoded insights. Upgrade to:
+- Show post-session mini prompts: feeling score (1-5 stars), "What did you like?" textarea, "What would you try next time?" textarea
+- On submit: call `spark-reflection-ai` edge function
+- Display AI-generated reflection when returned
+- Keep "Continue" button behavior unchanged
 
-### 2. Settings Page (`/settings`)
+### 4. Update Vault Components
 
-Account management, data deletion, subscription management.
+**`ReplayVault.tsx`**: Switch from querying `chemistry_replays` to querying `chemistry_vault_items` joined with `spark_reflections`. Display text-only vault entries with partner names.
 
-**Create `src/pages/Settings.tsx`:**
-- Header: "Settings"
-- Sections:
-  - **Account**: Email display, link to Profile for name/avatar editing
-  - **Subscription**: Current tier display + "Manage subscription" button (reuse customer-portal invoke from Profile.tsx)
-  - **Privacy & Data**: 
-    - "Download my data" button (shows toast "Coming soon" for now)
-    - "Delete my account" button with confirmation dialog (re-auth via password prompt, then calls `supabase.rpc('delete_my_account')` — we'll need to note this RPC doesn't exist yet, so show a toast explaining the request has been submitted)
-  - **Legal**: Links to Privacy, Terms, Safety pages
-  - **App**: Sign out button
-- BottomNav with "profile" active tab
-- Helmet SEO
+**`ReplayCard.tsx`**: Show vault item title, AI reflection preview, user notes, and timestamps. No video references.
 
-**Route:** Protected (auth required, no requireTrust).
+### 5. Route + Config
 
-### 3. Route + Nav Updates
+- Add `verify_jwt = false` for `spark-reflection-ai` in `supabase/config.toml`
+- No new routes needed (vault is already a tab in SparkHistory)
 
-**`src/App.tsx`:**
-- Add lazy imports for GreenRoom and Settings
-- Add routes: `/green-room` (ProtectedRoute) and `/settings` (ProtectedRoute)
+### Files
 
-**`src/components/BottomNav.tsx`:**
-- Change "Profile" tab path from `/profile` to `/settings` (settings is the standard destination; profile is accessible from within settings)
-- Keep other tabs unchanged
+**Create:**
+- `supabase/functions/spark-reflection-ai/index.ts`
 
-**`src/pages/Lobby.tsx`:**
-- Add a "Green Room" banner/link at the top for first-time users or as a persistent "Check your setup" link before joining a Drop
+**Edit:**
+- `src/components/call/SparkReflection.tsx` — interactive prompts + AI call
+- `src/components/vault/ReplayVault.tsx` — query `chemistry_vault_items`
+- `src/components/vault/ReplayCard.tsx` — display vault item data
+- `supabase/config.toml` — add function entry
 
----
-
-### Files to create (2)
-- `src/pages/GreenRoom.tsx`
-- `src/pages/Settings.tsx`
-
-### Files to edit (3)
-- `src/App.tsx` — 2 new lazy imports + 2 new routes
-- `src/components/BottomNav.tsx` — update Profile tab to `/settings`
-- `src/pages/Lobby.tsx` — add Green Room link in header area
-
-### No DB migrations needed.
-No new edge functions needed. The "delete account" action will show a confirmation toast directing user to contact support until a proper RPC is built in a later phase.
+**DB Migration:**
+- Create `spark_reflections` and `chemistry_vault_items` tables with RLS
 
