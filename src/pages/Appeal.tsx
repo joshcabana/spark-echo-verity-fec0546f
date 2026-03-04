@@ -46,9 +46,8 @@ const Appeal = () => {
 
       // Fetch pending flags (not yet appealed) for this user
       const { data: flags } = await supabase
-        .from("moderation_flags")
+        .from("my_moderation_flags" as any)
         .select("id, reason, ai_confidence, created_at")
-        .eq("flagged_user_id", user.id)
         .is("action_taken", null)
         .order("created_at", { ascending: false })
         .limit(1);
