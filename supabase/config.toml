@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.aggregate-stats]
 verify_jwt = false
+
+[functions.export-my-data]
+verify_jwt = false
+
+[functions.delete-account]
+verify_jwt = false

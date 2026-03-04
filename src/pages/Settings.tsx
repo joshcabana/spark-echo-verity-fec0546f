@@ -43,15 +43,36 @@ const Settings = () => {
     }
   };
 
-  const handleDownloadData = () => {
-    toast.info("Data export is coming soon.");
+  const handleDownloadData = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("export-my-data");
+      if (error) throw error;
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "verity-data-export.json";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Data exported successfully");
+    } catch {
+      toast.error("Failed to export data. Please try again.");
+    }
   };
 
   const handleDeleteAccount = async () => {
     setDeletePending(true);
-    // RPC doesn't exist yet — show guidance toast
-    toast.info("Account deletion request submitted. Please contact privacy@getverity.com.au to complete the process.", { duration: 8000 });
-    setDeletePending(false);
+    try {
+      const { error } = await supabase.functions.invoke("delete-account");
+      if (error) throw error;
+      await signOut();
+      navigate("/");
+      toast.success("Your account has been deleted.");
+    } catch {
+      toast.error("Failed to delete account. Please contact privacy@getverity.com.au.");
+    } finally {
+      setDeletePending(false);
+    }
   };
 
   const handleSignOut = async () => {

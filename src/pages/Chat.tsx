@@ -11,6 +11,8 @@ import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatComposer from "@/components/chat/ChatComposer";
 import VoiceIntroBanner from "@/components/chat/VoiceIntroBanner";
 
+const TYPING_TIMEOUT = 3000;
+
 interface Message {
   id: string;
   sender_id: string;
@@ -29,7 +31,9 @@ const Chat = () => {
   const [partnerName, setPartnerName] = useState("Spark");
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [partnerVoicePath, setPartnerVoicePath] = useState<string | null>(null);
-
+  const [partnerTyping, setPartnerTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingBroadcast = useRef(0);
   // Fetch spark data
   useEffect(() => {
     if (!sparkId || !user) return;
@@ -87,6 +91,37 @@ const Chat = () => {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [sparkId]);
+
+  // Typing indicator via Realtime Broadcast
+  useEffect(() => {
+    if (!sparkId || !user) return;
+    const channel = supabase.channel(`typing-${sparkId}`);
+    channel
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload?.user_id !== user.id) {
+          setPartnerTyping(true);
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), TYPING_TIMEOUT);
+        }
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    };
+  }, [sparkId, user]);
+
+  const broadcastTyping = useCallback(() => {
+    if (!sparkId || !user) return;
+    const now = Date.now();
+    if (now - lastTypingBroadcast.current < 2000) return;
+    lastTypingBroadcast.current = now;
+    supabase.channel(`typing-${sparkId}`).send({
+      type: "broadcast",
+      event: "typing",
+      payload: { user_id: user.id },
+    });
+  }, [sparkId, user]);
 
   // Auto-scroll
   useEffect(() => {
@@ -214,10 +249,11 @@ const Chat = () => {
         {messages.map((msg, i) => (
           <MessageBubble key={msg.id} message={msg} currentUserId={user?.id || ""} index={i} />
         ))}
+        {partnerTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
 
-      <ChatComposer onSend={handleSend} />
+      <ChatComposer onSend={handleSend} onTyping={broadcastTyping} />
     </div>
   );
 };

@@ -4,11 +4,12 @@ import { Send, Mic } from "lucide-react";
 
 interface ChatComposerProps {
   onSend: (text: string) => void;
+  onTyping?: () => void;
 }
 
 const MAX_CHARS = 1000;
 
-const ChatComposer = ({ onSend }: ChatComposerProps) => {
+const ChatComposer = ({ onSend, onTyping }: ChatComposerProps) => {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -54,7 +55,10 @@ const ChatComposer = ({ onSend }: ChatComposerProps) => {
             ref={textareaRef}
             value={text}
             onChange={(e) => {
-              if (e.target.value.length <= MAX_CHARS) setText(e.target.value);
+              if (e.target.value.length <= MAX_CHARS) {
+                setText(e.target.value);
+                onTyping?.();
+              }
             }}
             onKeyDown={handleKeyDown}
             placeholder="Write a message…"
