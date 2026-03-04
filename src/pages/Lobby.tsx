@@ -346,6 +346,8 @@ const Lobby = () => {
               onJoin={handleJoin}
               trustComplete={trustComplete}
               index={i}
+              waitingCount={(waitingCounts as Record<string, number>)[drop.id] ?? 0}
+              index={i}
             />
           ))}
         </div>
