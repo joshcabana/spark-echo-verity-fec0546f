@@ -4,11 +4,12 @@ import { Send, Mic } from "lucide-react";
 
 interface ChatComposerProps {
   onSend: (text: string) => void;
+  onTyping?: () => void;
 }
 
 const MAX_CHARS = 1000;
 
-const ChatComposer = ({ onSend }: ChatComposerProps) => {
+const ChatComposer = ({ onSend, onTyping }: ChatComposerProps) => {
   const [text, setText] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
