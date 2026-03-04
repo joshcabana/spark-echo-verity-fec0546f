@@ -139,6 +139,7 @@ const SparkHistory = () => {
         </header>
 
         <main className="container max-w-2xl mx-auto px-5 pt-5">
+          <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
           <TabsContent value="sparks">
             <div className="flex gap-2 mb-4">
               {filters.map((f) => (

@@ -300,6 +300,7 @@ const Lobby = () => {
       </header>
 
       <main className="container max-w-2xl mx-auto px-5 pt-8">
+        <PullToRefreshIndicator pullDistance={pullDistance} isRefreshing={isRefreshing} />
         {strictPhoneProviderBlocked && (
           <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
             Live Drops are temporarily paused because phone verification is required but the SMS provider is offline.
