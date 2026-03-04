@@ -142,6 +142,9 @@ const navItems: { id: AdminSection; label: string; icon: React.ElementType }[] =
 const Admin = () => {
   const [section, setSection] = useState<AdminSection>("moderation");
   const [userSearch, setUserSearch] = useState("");
+  const [dropFormOpen, setDropFormOpen] = useState(false);
+  const [editingDrop, setEditingDrop] = useState<(Tables<"drops"> & { rooms?: { name: string } | null }) | null>(null);
+  const [dropForm, setDropForm] = useState<DropForm>(emptyDropForm);
   const queryClient = useQueryClient();
 
   // ═══ REAL DATA QUERIES ═══
