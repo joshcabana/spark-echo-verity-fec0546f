@@ -31,7 +31,9 @@ const Chat = () => {
   const [partnerName, setPartnerName] = useState("Spark");
   const [partnerId, setPartnerId] = useState<string | null>(null);
   const [partnerVoicePath, setPartnerVoicePath] = useState<string | null>(null);
-
+  const [partnerTyping, setPartnerTyping] = useState(false);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingBroadcast = useRef(0);
   // Fetch spark data
   useEffect(() => {
     if (!sparkId || !user) return;
