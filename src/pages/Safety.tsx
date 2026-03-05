@@ -110,7 +110,7 @@ const Safety = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="flex items-start gap-5 bg-card border border-border rounded-lg p-6 hover:border-primary/20 transition-all duration-500"
+                className="flex items-start gap-4 bg-card border border-border rounded-lg p-4 hover:border-primary/20 transition-all duration-500"
               >
                 <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                   <point.icon className="w-5 h-5 text-primary" />
