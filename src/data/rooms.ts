@@ -6,8 +6,6 @@ export interface Room {
   name: string;
   tagline: string;
   icon: ComponentType<{ className?: string }>;
-  occupancy: number;
-  maxOccupancy: number;
   premium: boolean;
   peakHours: string;
 }
