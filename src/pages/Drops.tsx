@@ -87,7 +87,7 @@ const Drops = () => {
                       </span>
                     </div>
                   </div>
-                  <Link to="/auth" className="flex-shrink-0">
+                  <Link to="/auth?signup=true" className="flex-shrink-0">
                     <Button variant="gold-outline" size="sm" className="group">
                       RSVP
                       <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-0.5" />
