@@ -133,16 +133,21 @@ const Safety = () => {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-16"
           >
-            <Link to="/transparency">
-              <Button variant="gold-outline" size="lg">
-                View transparency report
-              </Button>
-            </Link>
-            <Link to="/privacy">
-              <Button variant="ghost" size="lg">
-                Read privacy policy
-              </Button>
-            </Link>
+             <Link to="/transparency">
+               <Button variant="gold-outline" size="lg">
+                 View transparency report
+               </Button>
+             </Link>
+             <Link to="/privacy">
+               <Button variant="ghost" size="lg">
+                 Read privacy policy
+               </Button>
+             </Link>
+             <Link to="/terms">
+               <Button variant="ghost" size="lg">
+                 Read terms of service
+               </Button>
+             </Link>
           </motion.div>
         </div>
       </main>

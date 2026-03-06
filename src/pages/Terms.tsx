@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { motion } from "framer-motion";
+import { FileText } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -24,6 +25,7 @@ const sections = [
     title: "4. Privacy",
     content:
       "Your privacy is fundamental to Verity. We do not store video or audio from calls. Identity is only revealed upon mutual Spark — this is enforced server-side and cannot be bypassed. For full details on data collection, storage, and your rights, please read our Privacy Policy.",
+    link: { to: "/privacy", label: "Privacy Policy" },
   },
   {
     title: "5. Intellectual Property",
@@ -69,6 +71,7 @@ const sections = [
     title: "13. Termination",
     content:
       "We may suspend or terminate your account at any time for violations of these terms or our community guidelines. You may delete your account at any time through the Settings page. Upon deletion, we will remove your personal data in accordance with our Privacy Policy.",
+    link: { to: "/privacy", label: "Privacy Policy" },
   },
   {
     title: "14. Contact",
@@ -101,31 +104,32 @@ const Terms = () => {
       <Navbar />
 
       <main className="pt-24 pb-16">
-        <div className="container max-w-3xl mx-auto px-6">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </Link>
-
-          <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-2">
-            Terms of Service
-          </h1>
-          <p className="text-sm text-muted-foreground mb-12">
-            Last updated: March 2026
-          </p>
+        <div className="container max-w-4xl mx-auto px-5">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
+            <FileText className="w-8 h-8 text-primary mx-auto mb-4" />
+            <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
+              Terms of Service
+            </h1>
+            <p className="text-muted-foreground/70 max-w-lg mx-auto leading-relaxed">
+              By using Verity, you agree to these terms. Please read them carefully alongside our{" "}
+              <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link> and{" "}
+              <Link to="/safety" className="text-primary hover:underline">Safety Promise</Link>.
+            </p>
+            <p className="text-xs text-muted-foreground/40 mt-4">Last updated: March 2026</p>
+          </motion.div>
 
           <div className="space-y-8">
-            {sections.map((s) => (
-              <div key={s.title}>
-                <h2 className="font-serif text-lg text-foreground mb-3">
-                  {s.title}
-                </h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {s.content}
-                </p>
-              </div>
+            {sections.map((s, i) => (
+              <motion.div
+                key={s.title}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.06 }}
+                className="rounded-lg border border-border bg-card p-6"
+              >
+                <h2 className="font-serif text-xl text-foreground mb-3">{s.title}</h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">{s.content}</p>
+              </motion.div>
             ))}
           </div>
         </div>
