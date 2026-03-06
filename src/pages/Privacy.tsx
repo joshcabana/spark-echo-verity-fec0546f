@@ -93,9 +93,11 @@ const Privacy = () => {
             <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
               Privacy Policy
             </h1>
-            <p className="text-muted-foreground/70 max-w-lg mx-auto leading-relaxed">
-              Your privacy is foundational to Verity. Here's exactly what we collect, why, and what you control.
-            </p>
+             <p className="text-muted-foreground/70 max-w-lg mx-auto leading-relaxed">
+               Your privacy is foundational to Verity. Here's exactly what we collect, why, and what you control. This policy should be read alongside our{" "}
+               <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
+               <Link to="/safety" className="text-primary hover:underline">Safety Promise</Link>.
+             </p>
             <p className="text-xs text-muted-foreground/40 mt-4">Last updated: March 2026</p>
           </motion.div>
 
