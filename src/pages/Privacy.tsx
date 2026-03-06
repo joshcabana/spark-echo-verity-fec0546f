@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Shield } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
@@ -23,7 +24,7 @@ const sections = [
   {
     title: "4. Third-Party Services",
     content:
-      "We use the following third-party services to operate Verity: Supabase (database and authentication, hosted in AWS Sydney region), Agora (real-time video infrastructure), Stripe (payment processing), and AI services for call safety analysis. Each processes only the minimum data required for their function. We do not sell your data to any third party.",
+      "We use the following third-party services to operate Verity: cloud database and authentication infrastructure (hosted in the AWS Sydney region), Agora (real-time video infrastructure), Stripe (payment processing), and AI services for call safety analysis. Each processes only the minimum data required for their function. We do not sell your data to any third party.",
   },
   {
     title: "5. Cross-Border Data Transfers",
@@ -93,9 +94,11 @@ const Privacy = () => {
             <h1 className="font-serif text-3xl md:text-4xl text-foreground mb-4">
               Privacy Policy
             </h1>
-            <p className="text-muted-foreground/70 max-w-lg mx-auto leading-relaxed">
-              Your privacy is foundational to Verity. Here's exactly what we collect, why, and what you control.
-            </p>
+             <p className="text-muted-foreground/70 max-w-lg mx-auto leading-relaxed">
+               Your privacy is foundational to Verity. Here's exactly what we collect, why, and what you control. This policy should be read alongside our{" "}
+               <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
+               <Link to="/safety" className="text-primary hover:underline">Safety Promise</Link>.
+             </p>
             <p className="text-xs text-muted-foreground/40 mt-4">Last updated: March 2026</p>
           </motion.div>
 
