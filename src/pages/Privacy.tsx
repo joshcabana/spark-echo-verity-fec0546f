@@ -84,6 +84,21 @@ const Privacy = () => {
         <meta name="twitter:title" content="Privacy Policy — Verity" />
         <meta name="twitter:description" content="Verity's privacy policy. What data we collect, how we use it, your rights, and how to contact us." />
         <meta name="twitter:image" content="https://getverity.com.au/og-logo.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Privacy Policy — Verity",
+          "description": "Verity's privacy policy. What data we collect, how we use it, your rights, and how to contact us.",
+          "url": "https://getverity.com.au/privacy",
+          "inLanguage": "en-AU",
+          "dateModified": "2026-03-01",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Verity",
+            "url": "https://getverity.com.au",
+            "logo": "https://getverity.com.au/og-logo.png"
+          }
+        })}</script>
       </Helmet>
       <Navbar />
 
