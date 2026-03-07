@@ -99,6 +99,21 @@ const Terms = () => {
         <meta name="twitter:title" content="Terms of Service — Verity" />
         <meta name="twitter:description" content="Verity's terms of service. Eligibility, acceptable use, privacy, payments, and governing law." />
         <meta name="twitter:image" content="https://getverity.com.au/og-logo.png" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Terms of Service — Verity",
+          "description": "Verity's terms of service. Eligibility, acceptable use, privacy, payments, and governing law for Australia's verified anonymous speed dating platform.",
+          "url": "https://getverity.com.au/terms",
+          "inLanguage": "en-AU",
+          "dateModified": "2026-03-01",
+          "publisher": {
+            "@type": "Organization",
+            "name": "Verity",
+            "url": "https://getverity.com.au",
+            "logo": "https://getverity.com.au/og-logo.png"
+          }
+        })}</script>
       </Helmet>
 
       <Navbar />
