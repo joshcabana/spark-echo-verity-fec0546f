@@ -134,7 +134,7 @@ const Pricing = () => {
                     </li>
                   ))}
                 </ul>
-                <Link to="/auth" className="block">
+                <Link to="/onboarding" className="block">
                   <Button
                     variant={tier.variant}
                     size="lg"
