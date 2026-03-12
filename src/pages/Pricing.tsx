@@ -102,9 +102,9 @@ const Pricing = () => {
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="text-[10px] tracking-luxury uppercase bg-primary text-primary-foreground px-3 py-1 rounded-full">
-                      Most popular
-                    </span>
+                     <span className="text-[10px] tracking-luxury uppercase bg-primary text-primary-foreground px-3 py-1 rounded-full">
+                       Founding member
+                     </span>
                   </div>
                 )}
                 <h2 className="font-serif text-2xl text-foreground mb-1">
