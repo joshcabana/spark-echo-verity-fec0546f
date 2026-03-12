@@ -67,15 +67,17 @@ const Chat = () => {
   // Fetch messages
   useEffect(() => {
     if (!sparkId) return;
+    let cancelled = false;
     const fetchMessages = async () => {
       const { data } = await supabase
         .from("messages")
         .select("id, sender_id, content, created_at, is_read")
         .eq("spark_id", sparkId)
         .order("created_at", { ascending: true });
-      if (data) setMessages(data);
+      if (!cancelled && data) setMessages(data);
     };
     fetchMessages();
+    return () => { cancelled = true; };
   }, [sparkId]);
 
   // Realtime messages

@@ -105,6 +105,7 @@ const App = () => (
               </ErrorBoundary>
             </AuthProvider>
           </BrowserRouter>
+          <CookieConsent />
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

@@ -134,6 +134,10 @@ const Appeal = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Appeal — Verity</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Header */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container max-w-2xl mx-auto px-5 py-4 flex items-center gap-4">

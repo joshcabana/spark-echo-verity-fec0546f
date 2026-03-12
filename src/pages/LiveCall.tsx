@@ -342,7 +342,7 @@ const LiveCall = () => {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { cancelled = true; supabase.removeChannel(channel); };
   }, [phase, callId]);
 
   // Handle safe exit
