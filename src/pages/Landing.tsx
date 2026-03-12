@@ -26,6 +26,7 @@ const Landing = () => {
         <meta name="twitter:description" content="Verified 18+ anonymous speed dating. Real chemistry in 45 seconds. Mutual spark only. Dignity always." />
         <meta name="twitter:image" content="https://getverity.com.au/og-logo.png" />
       </Helmet>
+      <BetaBanner />
       <Navbar />
       <HeroSection />
       <StatsSection />

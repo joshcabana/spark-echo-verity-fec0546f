@@ -84,6 +84,15 @@ const HowItWorks = () => {
             </p>
           </motion.div>
 
+          <div className="relative w-full rounded-xl overflow-hidden my-12 aspect-[16/9] max-w-2xl mx-auto ring-1 ring-primary/10">
+            <img
+              src="https://cdn.jsdelivr.net/gh/joshcabana/GetVerity.1@main/public/videos/verity-howitworks-visual.jpg"
+              alt="A genuine smile during a video call — real connection through a screen"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+
           <div className="space-y-8">
             {steps.map((item, i) => (
               <motion.div

@@ -123,6 +123,16 @@ const Safety = () => {
             </p>
           </motion.div>
 
+          <div className="relative w-full rounded-xl overflow-hidden my-12 aspect-[16/9] max-w-2xl mx-auto">
+            <img
+              src="https://cdn.jsdelivr.net/gh/joshcabana/GetVerity.1@main/public/videos/verity-safety-visual.jpg"
+              alt="Two hands reaching toward each other in candlelight — trust and connection"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+          </div>
+
           <div className="space-y-3">
             {safetyPoints.map((point, i) => (
               <motion.div
