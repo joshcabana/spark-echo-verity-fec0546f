@@ -1,5 +1,5 @@
 import { Helmet } from "react-helmet-async";
-import { Heart, Shield, Eye } from "lucide-react";
+import { Heart, Shield, Eye, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/landing/Navbar";
@@ -30,8 +30,29 @@ const About = () => {
             About Verity
           </h1>
           <p className="text-muted-foreground/70 text-lg mb-12">
-            Built by a solo Australian developer in Canberra, 2026.
+            Built by one person who was tired of what dating apps became.
           </p>
+
+          {/* The story — first section */}
+          <section className="mb-12">
+            <div className="bg-card border border-border rounded-lg p-6 md:p-8">
+              <h2 className="font-serif text-xl text-foreground mb-4 flex items-center gap-2">
+                <Eye className="w-5 h-5 text-primary" />
+                The story
+              </h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  There is no team page — this is a one-person project built with conviction.
+                  Verity is designed, developed, and operated by a solo founder in Canberra, Australia.
+                </p>
+                <p>
+                  No venture capital. No growth-hacking. No dark patterns. Just a genuine attempt
+                  to fix how people meet — built by someone who experienced the same frustration
+                  everyone else did.
+                </p>
+              </div>
+            </div>
+          </section>
 
           {/* Why */}
           <section className="mb-12">
@@ -41,13 +62,13 @@ const About = () => {
             </h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
               <p>
-                78% of dating-app users report burnout. 80% of women experience dating fatigue. 
-                Ghosting accounts for 41% of that fatigue. The swipe economy is broken — it optimises 
+                78% of dating-app users report burnout. 80% of women experience dating fatigue.
+                Ghosting accounts for 41% of that fatigue. The swipe economy is broken — it optimises
                 for engagement, not connection.
               </p>
               <p>
-                Verity is the opposite: real eyes, real voice, 45 seconds, and dignity always. 
-                No infinite scroll, no streaks, no dopamine loops. If there's no spark, there's no 
+                Verity is the opposite: real eyes, real voice, 45 seconds, and dignity always.
+                No infinite scroll, no streaks, no dopamine loops. If there's no spark, there's no
                 trace. If there is — both people chose it.
               </p>
             </div>
@@ -79,29 +100,18 @@ const About = () => {
             </ul>
           </section>
 
-          {/* Solo founder */}
-          <section className="mb-12">
-            <h2 className="font-serif text-xl text-foreground mb-4 flex items-center gap-2">
-              <Eye className="w-5 h-5 text-primary" />
-              The team
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              There is no team page — this is a one-person project built with conviction. 
-              Verity is designed, developed, and operated by a solo founder in Australia. 
-              No venture capital, no growth-hacking, no dark patterns. Just a genuine attempt 
-              to fix how people meet.
-            </p>
-          </section>
-
           <div className="pt-6 border-t border-border/30 flex items-center gap-4">
-            <span className="text-xs text-muted-foreground/60">🇦🇺 Australian Built</span>
+            <span className="text-xs text-muted-foreground/60">🇦🇺 Built by one person in Australia</span>
             <span className="text-xs text-muted-foreground/40">·</span>
             <span className="text-xs text-muted-foreground/60">18+ verified · Nothing stored until mutual Spark</span>
           </div>
 
           <div className="mt-8">
             <Link to="/onboarding">
-              <Button variant="gold-outline" size="sm">Get verified</Button>
+              <Button variant="gold" size="sm" className="group">
+                Get started
+                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
             </Link>
           </div>
         </div>

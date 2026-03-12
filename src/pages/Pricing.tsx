@@ -25,9 +25,10 @@ const tiers = [
   },
   {
     name: "Verity Pass",
-    price: "$14.99",
+    price: "$9.99",
+    oldPrice: "$14.99",
     period: "/month",
-    description: "For those who want deeper connection and priority access.",
+    description: "Founding member pricing — locked in for early supporters.",
     features: [
       "Everything in Free",
       "Spark Reflection AI insights",
@@ -101,18 +102,23 @@ const Pricing = () => {
               >
                 {tier.highlighted && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="text-[10px] tracking-luxury uppercase bg-primary text-primary-foreground px-3 py-1 rounded-full">
-                      Most popular
-                    </span>
+                     <span className="text-[10px] tracking-luxury uppercase bg-primary text-primary-foreground px-3 py-1 rounded-full">
+                       Founding member
+                     </span>
                   </div>
                 )}
                 <h2 className="font-serif text-2xl text-foreground mb-1">
                   {tier.name}
                 </h2>
-                <div className="flex items-baseline gap-1 mb-3">
+                <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-3xl font-serif text-foreground">
                     {tier.price}
                   </span>
+                  {"oldPrice" in tier && (tier as any).oldPrice && (
+                    <span className="text-sm text-muted-foreground/50 line-through">
+                      {(tier as any).oldPrice}
+                    </span>
+                  )}
                   <span className="text-sm text-muted-foreground">
                     {tier.period}
                   </span>
@@ -128,7 +134,7 @@ const Pricing = () => {
                     </li>
                   ))}
                 </ul>
-                <Link to="/auth" className="block">
+                <Link to="/onboarding" className="block">
                   <Button
                     variant={tier.variant}
                     size="lg"
