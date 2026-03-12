@@ -140,7 +140,7 @@ const Auth = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleSubmit as unknown as React.MouseEventHandler}
+                onClick={() => sendMagicLink()}
                 className="w-full"
                 disabled={loading}
               >
