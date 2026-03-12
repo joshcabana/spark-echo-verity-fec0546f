@@ -33,6 +33,16 @@ const About = () => {
             Built by one person who was tired of what dating apps became.
           </p>
 
+          <div className="relative w-full rounded-xl overflow-hidden my-12 aspect-[16/9] max-w-3xl mx-auto">
+            <img
+              src="https://cdn.jsdelivr.net/gh/joshcabana/GetVerity.1@main/public/videos/verity-about-hero.jpg"
+              alt="Solo founder working late at night, building Verity"
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
+          </div>
+
           {/* The story — first section */}
           <section className="mb-12">
             <div className="bg-card border border-border rounded-lg p-6 md:p-8">
