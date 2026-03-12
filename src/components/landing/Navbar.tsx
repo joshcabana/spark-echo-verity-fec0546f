@@ -102,9 +102,9 @@ const Navbar = () => {
               </Link>
               <div className="flex items-center justify-between mt-2">
                 <ThemeToggle />
-                <Link to="/auth?signup=true" onClick={() => setMobileOpen(false)}>
+                <Link to="/onboarding" onClick={() => setMobileOpen(false)}>
                   <Button variant="gold" size="sm">
-                    RSVP for the next Drop
+                    Get started
                   </Button>
                 </Link>
               </div>

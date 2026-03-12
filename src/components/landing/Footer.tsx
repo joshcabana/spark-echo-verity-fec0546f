@@ -34,12 +34,6 @@ const Footer = () => {
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/onboarding"
-              className="hover:text-primary transition-colors"
-            >
-              Get verified
-            </Link>
           </div>
         </div>
 
@@ -52,20 +46,18 @@ const Footer = () => {
             ·
           </span>
           <span className="text-xs text-muted-foreground/60">
-            🇦🇺 Australian Built
+            🇦🇺 Built by one person in Australia
           </span>
         </div>
 
-        {/* Contact & legal */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 text-xs text-muted-foreground/50">
+        {/* Contact */}
+        <div className="text-center mt-4">
           <a
             href="mailto:hello@getverity.com.au"
-            className="hover:text-foreground transition-colors"
+            className="text-xs text-muted-foreground/50 hover:text-foreground transition-colors"
           >
             hello@getverity.com.au
           </a>
-          <span className="hidden sm:inline">·</span>
-          <span>ABN pending</span>
         </div>
       </div>
     </footer>

@@ -128,9 +128,9 @@ const FAQ = () => {
               </Link>
               .
             </p>
-            <Link to="/auth">
+            <Link to="/onboarding">
               <Button variant="gold" size="lg" className="group">
-                RSVP for the next Drop
+                Get started
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
