@@ -25,9 +25,10 @@ const tiers = [
   },
   {
     name: "Verity Pass",
-    price: "$14.99",
+    price: "$9.99",
+    oldPrice: "$14.99",
     period: "/month",
-    description: "For those who want deeper connection and priority access.",
+    description: "Founding member pricing — locked in for early supporters.",
     features: [
       "Everything in Free",
       "Spark Reflection AI insights",
