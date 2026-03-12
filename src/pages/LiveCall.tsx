@@ -124,6 +124,7 @@ const LiveCall = () => {
   // Fetch call data and get Agora token
   useEffect(() => {
     if (!callId || !user) return;
+    let cancelled = false;
 
     const fetchCall = async () => {
       const { data: call, error } = await supabase
@@ -132,6 +133,7 @@ const LiveCall = () => {
         .eq("id", callId)
         .single();
 
+      if (cancelled) return;
       if (error || !call) {
         toast.error("Call not found");
         navigate("/lobby");
@@ -149,6 +151,7 @@ const LiveCall = () => {
         body: { call_id: callId, channel },
       });
 
+      if (cancelled) return;
       if (tokenErr) {
         toast.error("Failed to get call credentials");
         navigate("/lobby");
@@ -164,6 +167,7 @@ const LiveCall = () => {
     };
 
     fetchCall();
+    return () => { cancelled = true; };
   }, [callId, user, navigate, channelFromUrl]);
 
   // When Agora joins, start the live phase
