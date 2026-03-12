@@ -47,8 +47,7 @@ const Auth = () => {
     }
   }, [user, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const sendMagicLink = async () => {
     if (!email.trim()) return;
     setLoading(true);
 
