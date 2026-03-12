@@ -2,12 +2,13 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Mail, Lock, UserPlus, LogIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
 import VerityLogo from "@/components/VerityLogo";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AuthSkeleton = () => (
   <div className="min-h-screen bg-background flex flex-col">
@@ -23,7 +24,6 @@ const AuthSkeleton = () => (
         <div className="space-y-4">
           <Skeleton className="h-12 w-full rounded-md" />
           <Skeleton className="h-12 w-full rounded-md" />
-          <Skeleton className="h-12 w-full rounded-md" />
         </div>
         <Skeleton className="h-4 w-52 mx-auto mt-6" />
       </div>
@@ -35,190 +35,145 @@ export { AuthSkeleton };
 
 const Auth = () => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [displayName, setDisplayName] = useState("");
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [linkSent, setLinkSent] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (searchParams.get("signup") === "true") {
-      setMode("signup");
+    if (user) {
+      navigate("/lobby", { replace: true });
     }
-  }, [searchParams]);
+  }, [user, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim() || !password.trim()) return;
+  const sendMagicLink = async () => {
+    if (!email.trim()) return;
     setLoading(true);
 
     try {
-      if (mode === "signup") {
-        const normalizedEmail = email.trim().toLowerCase();
-        const { error } = await supabase.auth.signUp({
-          email: normalizedEmail,
-          password,
-          options: {
-            data: { display_name: displayName || normalizedEmail.split("@")[0] },
-            emailRedirectTo: window.location.origin,
-          },
-        });
-        if (error) throw error;
-        setPendingVerificationEmail(normalizedEmail);
-        toast({
-          title: "Check your inbox",
-          description: `We've sent a verification link to ${normalizedEmail}.`,
-        });
-      } else {
-        const normalizedEmail = email.trim().toLowerCase();
-        const { data, error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
-        if (error) throw error;
-
-        // Check onboarding status
-        if (data.user) {
-          const { data: trust } = await supabase
-            .from("user_trust")
-            .select("onboarding_complete")
-            .eq("user_id", data.user.id)
-            .maybeSingle();
-
-          if (trust?.onboarding_complete) {
-            navigate("/lobby");
-          } else {
-            navigate("/onboarding");
-          }
-        }
-      }
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "An unexpected error occurred";
-      toast({
-        title: "Something went wrong",
-        description: message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendVerification = async () => {
-    if (!pendingVerificationEmail) return;
-    setResending(true);
-    try {
-      const { error } = await supabase.auth.resend({
-        type: "signup",
-        email: pendingVerificationEmail,
-        options: {
-          emailRedirectTo: window.location.origin,
-        },
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email.trim().toLowerCase(),
+        options: { emailRedirectTo: window.location.origin + "/onboarding" },
       });
       if (error) throw error;
+      setLinkSent(true);
       toast({
-        title: "Verification email resent",
-        description: `A new verification link was sent to ${pendingVerificationEmail}.`,
+        title: "Magic link sent",
+        description: "Check your inbox and click the link to continue.",
       });
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Unable to resend verification email";
-      toast({
-        title: "Resend failed",
-        description: message,
-        variant: "destructive",
-      });
+      const message = err instanceof Error ? err.message : "An unexpected error occurred";
+      toast({ title: "Something went wrong", description: message, variant: "destructive" });
     } finally {
-      setResending(false);
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="p-6">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
           <ArrowLeft className="w-4 h-4" />
           Back
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
-          className="w-full max-w-md">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="w-full max-w-md"
+        >
           <div className="text-center mb-10">
             <VerityLogo className="h-9 w-auto mx-auto mb-2" linkTo="/" />
             <p className="text-sm text-muted-foreground">
-              {mode === "login" ? "Welcome back." : "Join a community that values real connection."}
+              Sign in with a magic link — no password needed.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "signup" && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}>
-                <Input type="text" placeholder="Display name" value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)} className="h-12 bg-card border-border" />
-              </motion.div>
-            )}
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input type="email" placeholder="Your email address" value={email}
-                onChange={(e) => setEmail(e.target.value)} className="pl-11 h-12 bg-card border-border" required />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input type="password" placeholder="Password" value={password}
-                onChange={(e) => setPassword(e.target.value)} className="pl-11 h-12 bg-card border-border" required minLength={6} />
-            </div>
-            <Button type="submit" variant="gold" size="lg" className="w-full group" disabled={loading}>
-              {loading ? (
-                <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-              ) : mode === "login" ? (
-                <><LogIn className="w-4 h-4 mr-2" /> Sign in</>
-              ) : (
-                <><UserPlus className="w-4 h-4 mr-2" /> Create account</>
-              )}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <button onClick={() => {
-              setMode(mode === "login" ? "signup" : "login");
-              setPendingVerificationEmail(null);
-            }}
-              className="text-sm text-primary hover:text-primary/80 transition-colors">
-              {mode === "login" ? "New here? Create an account" : "Already have an account? Sign in"}
-            </button>
-          </div>
-          {mode === "signup" && pendingVerificationEmail && (
-            <div className="mt-4 rounded-lg border border-border bg-card/40 p-4 text-left">
-              <p className="text-sm text-foreground mb-2">
-                Waiting for verification email?
-              </p>
-              <p className="text-xs text-muted-foreground mb-3">
-                Check inbox, spam, and promotions for <span className="font-mono">{pendingVerificationEmail}</span>.
-                If it still has not arrived, resend below.
-              </p>
+          {!linkSent ? (
+            <form onSubmit={(e) => { e.preventDefault(); sendMagicLink(); }} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="email"
+                  placeholder="you@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-11 h-12 bg-card border-border"
+                  required
+                />
+              </div>
               <Button
-                type="button"
+                type="submit"
+                variant="gold"
+                size="lg"
+                className="w-full group"
+                disabled={loading || !email.trim()}
+              >
+                {loading ? (
+                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    Send magic link
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </>
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="rounded-lg border border-border bg-card/40 p-4">
+                <p className="text-sm text-foreground mb-1">
+                  Waiting for you to click the link…
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Check inbox, spam, and promotions for{" "}
+                  <span className="font-mono">{email}</span>.
+                </p>
+              </div>
+              <Button
                 variant="outline"
                 size="sm"
+                onClick={() => sendMagicLink()}
                 className="w-full"
-                onClick={handleResendVerification}
-                disabled={resending}
+                disabled={loading}
               >
-                {resending ? "Resending..." : "Resend verification email"}
+                {loading ? "Resending…" : "Resend magic link"}
               </Button>
+              <div className="text-center">
+                <button
+                  onClick={() => setLinkSent(false)}
+                  className="text-xs text-primary hover:text-primary/80 transition-colors"
+                >
+                  Use a different email
+                </button>
+              </div>
             </div>
           )}
+
+          <p className="mt-8 text-center text-[10px] text-muted-foreground/60 tracking-wide">
+            We never share your email. Ever.
+          </p>
         </motion.div>
       </div>
 
       <div className="p-6 text-center">
         <p className="text-xs text-muted-foreground/40">
           By continuing, you agree to Verity's{" "}
-          <Link to="/terms" className="underline hover:text-muted-foreground transition-colors">terms of service</Link>
-          {" "}and{" "}
-          <Link to="/privacy" className="underline hover:text-muted-foreground transition-colors">privacy policy</Link>.
+          <Link to="/terms" className="underline hover:text-muted-foreground transition-colors">
+            terms of service
+          </Link>{" "}
+          and{" "}
+          <Link to="/privacy" className="underline hover:text-muted-foreground transition-colors">
+            privacy policy
+          </Link>
+          .
         </p>
       </div>
     </div>
