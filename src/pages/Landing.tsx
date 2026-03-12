@@ -30,6 +30,7 @@ const Landing = () => {
       <HeroSection />
       <StatsSection />
       <HowItWorksSection />
+      <PromoVideoSection />
       <FeaturesSection />
       <TrustSection />
       <CTASection />
