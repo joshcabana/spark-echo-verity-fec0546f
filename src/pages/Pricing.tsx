@@ -110,10 +110,15 @@ const Pricing = () => {
                 <h2 className="font-serif text-2xl text-foreground mb-1">
                   {tier.name}
                 </h2>
-                <div className="flex items-baseline gap-1 mb-3">
+                <div className="flex items-baseline gap-2 mb-3">
                   <span className="text-3xl font-serif text-foreground">
                     {tier.price}
                   </span>
+                  {"oldPrice" in tier && (tier as any).oldPrice && (
+                    <span className="text-sm text-muted-foreground/50 line-through">
+                      {(tier as any).oldPrice}
+                    </span>
+                  )}
                   <span className="text-sm text-muted-foreground">
                     {tier.period}
                   </span>
