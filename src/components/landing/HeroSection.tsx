@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Mail, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroBg from "@/assets/hero-bg.jpg";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -44,13 +44,21 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[85vh] flex items-start justify-center overflow-hidden pt-28 md:pt-32">
-      {/* Background image */}
+      {/* Background video */}
       <div className="absolute inset-0">
-        <img
-          src={heroBg}
-          alt=""
-          className="w-full h-full object-cover opacity-40"
-        />
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          className="w-full h-full object-cover opacity-40 hidden md:block"
+          poster=""
+        >
+          <source src="https://cdn.jsdelivr.net/gh/joshcabana/GetVerity.1@main/public/videos/verity-hero-background.mp4" type="video/mp4" />
+        </video>
+        {/* Mobile fallback - dark gradient only */}
+        <div className="absolute inset-0 bg-background md:hidden" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
       </div>
 
