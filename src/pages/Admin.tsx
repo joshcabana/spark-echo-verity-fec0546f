@@ -33,6 +33,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
+import { Helmet } from "react-helmet-async";
 
 const PilotMetrics = () => {
   const { data: callStats } = useQuery({
@@ -450,6 +451,10 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <Helmet>
+        <title>Admin — Verity</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col w-56 border-r border-border bg-card/50 p-4 gap-1">
         <div className="flex items-center gap-2 mb-8 px-2">

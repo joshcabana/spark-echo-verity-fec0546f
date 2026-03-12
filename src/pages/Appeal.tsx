@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { Helmet } from "react-helmet-async";
 
 interface ModerationFlag {
   id: string;
@@ -40,6 +41,7 @@ const Appeal = () => {
 
   useEffect(() => {
     if (!user) return;
+    let cancelled = false;
 
     const fetchData = async () => {
       setLoading(true);
@@ -52,6 +54,8 @@ const Appeal = () => {
         .order("created_at", { ascending: false })
         .limit(1);
 
+      if (cancelled) return;
+
       // Check if any of these flags already have an appeal
       if (flags && flags.length > 0) {
         const { data: existingAppeal } = await supabase
@@ -60,6 +64,7 @@ const Appeal = () => {
           .eq("flag_id", flags[0].id)
           .limit(1);
 
+        if (cancelled) return;
         if (!existingAppeal || existingAppeal.length === 0) {
           setPendingFlag(flags[0]);
         }
@@ -72,11 +77,13 @@ const Appeal = () => {
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
+      if (cancelled) return;
       setPastAppeals((appeals as PastAppeal[]) || []);
       setLoading(false);
     };
 
     fetchData();
+    return () => { cancelled = true; };
   }, [user]);
 
   const handleSubmit = async () => {
@@ -127,6 +134,10 @@ const Appeal = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Appeal — Verity</title>
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
       {/* Header */}
       <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container max-w-2xl mx-auto px-5 py-4 flex items-center gap-4">
