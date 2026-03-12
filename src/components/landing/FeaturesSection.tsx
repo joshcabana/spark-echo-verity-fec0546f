@@ -1,42 +1,36 @@
 import { motion } from "framer-motion";
-import { Video, ShieldCheck, Brain, Compass, Calendar, Users } from "lucide-react";
+import { Video, ShieldCheck, Brain, Shield, MessageCircle } from "lucide-react";
 
 const features = [
   {
     icon: Video,
     title: "45-Second Anonymous Video",
     description:
-      "Two strangers, one fully anonymous live call. No profiles, no photos, no bios. Just real human connection in its purest form.",
+      "Two strangers, one fully anonymous live call. No profiles, no photos, no bios — just real human connection in its purest form.",
   },
   {
     icon: ShieldCheck,
     title: "Mutual-Spark Privacy",
     description:
-      "Both choose Spark or Pass independently. Only mutual sparks reveal identities. No rejection notifications — ever. Zero ego damage by design.",
+      "Both choose Spark or Pass independently. Only mutual sparks reveal identities. No rejection notifications — ever.",
   },
   {
     icon: Brain,
-    title: "Live Safety Checks",
+    title: "Spark Reflection",
     description:
-      "During live calls, Verity runs safety checks using transcript snippets and call metadata. No raw call video is stored.",
+      "Private post-call AI insight for personal growth. Tone and engagement analysis — e.g., 'You both showed highest energy discussing travel.'",
   },
   {
-    icon: Compass,
-    title: "Intention Over Addiction",
+    icon: Shield,
+    title: "Guardian Net",
     description:
-      "No infinite scroll. No streaks. No dopamine traps. Verity is designed to be used, not to trap you into using it.",
+      "One tap to share a safe-call signal with a trusted friend. They see only 'in Verity call until 9:12 pm' — nothing else.",
   },
   {
-    icon: Calendar,
+    icon: MessageCircle,
     title: "Scheduled Drops",
     description:
-      "RSVP to themed, time-limited sessions. Night Owls, Tech Professionals, Creatives & Makers, Over 35, Introvert Hours — join the Drop that fits your energy.",
-  },
-  {
-    icon: Users,
-    title: "Friendfluence Drops",
-    description:
-      "Bring a friend to a Drop for shared courage and double the chances. Real connections are braver together.",
+      "RSVP to themed, time-limited sessions. Night Owls, Tech Professionals, Creatives, Over 35 — join the Drop that fits your energy.",
   },
 ];
 
@@ -52,21 +46,46 @@ const FeaturesSection = () => {
           className="text-center mb-20"
         >
           <span className="text-xs tracking-luxury uppercase text-primary/60 mb-4 block">
-            The Verity experience
+            Features that shouldn't need to be new
           </span>
           <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground">
-            Six pillars. Zero compromise.
+            What nobody else is building
           </h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((feature, i) => (
+        {/* Top row: 3 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          {features.slice(0, 3).map((feature, i) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: i * 0.1 }}
+              className="group bg-card border border-border rounded-lg p-8 hover:border-primary/30 transition-all duration-500 hover:shadow-[0_0_40px_hsl(43_72%_55%/0.06)]"
+            >
+              <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors duration-500">
+                <feature.icon className="w-5 h-5 text-primary" />
+              </div>
+              <h3 className="font-serif text-xl text-foreground mb-3">
+                {feature.title}
+              </h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Bottom row: 2 cards centered */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {features.slice(3).map((feature, i) => (
+            <motion.div
+              key={feature.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: (i + 3) * 0.1 }}
               className="group bg-card border border-border rounded-lg p-8 hover:border-primary/30 transition-all duration-500 hover:shadow-[0_0_40px_hsl(43_72%_55%/0.06)]"
             >
               <div className="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors duration-500">
