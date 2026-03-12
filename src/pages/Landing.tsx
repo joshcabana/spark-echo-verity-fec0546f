@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import BetaBanner from "@/components/landing/BetaBanner";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import StatsSection from "@/components/landing/StatsSection";
