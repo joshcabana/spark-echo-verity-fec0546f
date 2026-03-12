@@ -55,9 +55,9 @@ const Navbar = () => {
           >
             Sign in
           </Link>
-          <Link to="/auth?signup=true">
+          <Link to="/onboarding">
             <Button variant="gold" size="sm">
-              RSVP for the next Drop
+              Get started
             </Button>
           </Link>
         </div>
