@@ -3,6 +3,7 @@ import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import StatsSection from "@/components/landing/StatsSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import PromoVideoSection from "@/components/landing/PromoVideoSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
 import TrustSection from "@/components/landing/TrustSection";
 import CTASection from "@/components/landing/CTASection";
