@@ -309,6 +309,7 @@ const LiveCall = () => {
   // Subscribe to call updates for partner's decision
   useEffect(() => {
     if (phase !== "waiting" || !callId) return;
+    let cancelled = false;
 
     // First check if both decisions already exist
     const checkDecisions = async () => {
@@ -317,6 +318,7 @@ const LiveCall = () => {
         .select("caller_decision, callee_decision, is_mutual_spark")
         .eq("id", callId)
         .single();
+      if (cancelled) return;
       if (data?.caller_decision && data?.callee_decision) {
         setWasMutualSpark(!!data.is_mutual_spark);
         setPhase(data.is_mutual_spark ? "mutual-spark" : "no-spark");
