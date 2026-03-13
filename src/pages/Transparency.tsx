@@ -2,9 +2,8 @@ import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import {
   Shield, Sparkles, Users, Activity, Eye,
-  BarChart3, Heart, ExternalLink, Check
+  BarChart3, Heart, Check
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   ChartContainer, ChartTooltip, ChartTooltipContent
 } from "@/components/ui/chart";
@@ -16,7 +15,7 @@ import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
 const principles = [
-  { title: "Privacy by design", text: "No call recordings are stored. Safety checks use call metadata and transcript snippets when available." },
+  { title: "Privacy by design", text: "No video or audio recordings are ever stored. Safety checks use call metadata and short text-based transcript snippets, retained for up to 30 days, then permanently deleted." },
   { title: "Radical fairness", text: "Every moderation decision can be appealed. Every appeal is reviewed by a human, not just an algorithm." },
   { title: "Transparent metrics", text: "We publish our safety and balance statistics in real time. We believe accountability builds trust." },
   { title: "No dark patterns", text: "No infinite scrolls, no addictive loops, no hidden fees. Verity is designed to help you connect, then step away." },
@@ -90,8 +89,8 @@ const Transparency = () => {
   ];
 
   const safetyStats = [
-    { label: "AI accuracy rate", value: `${stats?.ai_accuracy ?? 0}%`, detail: "Continuously improving with human review" },
-    { label: "Appeals total", value: String(stats?.appeals_total ?? 0), detail: "Every appeal is reviewed" },
+    { label: "AI moderation accuracy", value: (stats?.total_calls ?? 0) >= 100 && stats?.ai_accuracy != null ? `${stats.ai_accuracy}%` : "Pending", detail: "Published after 100+ moderation events. Precision claims without data are not transparency." },
+    { label: "Appeals total", value: String(stats?.appeals_total ?? 0), detail: "Every appeal is reviewed by a human" },
     { label: "Appeals upheld", value: String(stats?.appeals_upheld ?? 0), detail: "We listen and correct when wrong" },
     { label: "Moderation flags", value: String(stats?.moderation_flags_count ?? 0), detail: "Flags requiring review" },
   ];
@@ -130,6 +129,16 @@ const Transparency = () => {
             <p className="text-muted-foreground/70 max-w-lg mx-auto leading-relaxed">
               We believe trust is built through openness. Here is exactly how our platform performs.
             </p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-12">
+            <div className="rounded-lg border border-primary/20 bg-primary/[0.03] p-5 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-primary/50" />
+                <span className="text-xs uppercase tracking-luxury text-primary/70">Platform Status</span>
+              </div>
+              <p className="text-sm text-muted-foreground">Pre-launch beta · Transparency dashboard activates on first Drop</p>
+            </div>
           </motion.div>
 
           {!hasAnyStats ? (
@@ -227,16 +236,10 @@ const Transparency = () => {
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="text-center pb-12">
             <div className="rounded-xl border border-primary/15 bg-primary/[0.03] p-8">
               <Eye className="w-5 h-5 text-primary mx-auto mb-3" />
-              <h3 className="font-serif text-lg text-foreground mb-2">See the code behind our safety</h3>
-              <p className="text-sm text-muted-foreground/60 mb-5 max-w-md mx-auto">
-                Our moderation logic, privacy architecture, and data handling are documented publicly.
+              <h3 className="font-serif text-lg text-foreground mb-2">Building in the open</h3>
+              <p className="text-sm text-muted-foreground/60 max-w-md mx-auto">
+                We're documenting our moderation logic, privacy architecture, and data handling publicly as we build. This page will grow with us.
               </p>
-              <a href="https://github.com/joshcabana/GetVerity.1" target="_blank" rel="noopener noreferrer">
-                <Button variant="gold-outline" size="lg">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View safety documentation
-                </Button>
-              </a>
             </div>
           </motion.div>
         </div>
