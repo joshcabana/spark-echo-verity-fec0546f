@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireTrust = false }
   if (!session) return <Navigate to="/auth" replace />;
 
   if (requireTrust) {
-    const requirePhone = featureFlags?.requirePhoneVerification ?? true;
+    const requirePhone = featureFlags?.requirePhoneVerification ?? false;
     const trustComplete = !!(
       userTrust?.selfie_verified &&
       userTrust?.safety_pledge_accepted &&
