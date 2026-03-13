@@ -32,7 +32,7 @@ const tiers = [
     features: [
       "Everything in Free",
       "Spark Reflection AI insights",
-      "Chemistry Replay Vault",
+      "Chemistry Replay Vault (text-based notes — no video or audio)",
       "Priority RSVP for Drops",
       "Access to premium Drop rooms (Over 35, Introvert Hours, and future themed Drops)",
       "Advanced safety settings",

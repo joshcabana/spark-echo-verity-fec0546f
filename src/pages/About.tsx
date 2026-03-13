@@ -105,7 +105,7 @@ const About = () => {
               </li>
               <li className="flex items-start gap-3">
                 <span className="text-primary mt-1">✦</span>
-                <span><strong className="text-foreground">Radical transparency.</strong> Live safety stats, moderation accuracy, and gender balance published publicly.</span>
+                <span><strong className="text-foreground">Radical transparency.</strong> We commit to publishing live safety stats from the moment our first Drop runs.</span>
               </li>
             </ul>
           </section>

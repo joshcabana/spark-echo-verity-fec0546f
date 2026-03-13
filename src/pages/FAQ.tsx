@@ -13,39 +13,54 @@ import Footer from "@/components/landing/Footer";
 
 const faqs = [
   {
-    question: "Is it really anonymous if it's video?",
+    question: "Can my video call be recorded?",
     answer:
-      "Yes. Your video is anonymised at the track level before it reaches the other person. We use canvas-processed video — your raw camera feed is never transmitted. The other person sees an anonymised version of you (pixelated silhouette). This cannot be bypassed via browser DevTools because the raw track is never published. Identity is only revealed if both people independently choose Spark.",
+      "No. Verity never records video or audio. During live calls, our AI safety system processes short text-based transcript snippets in real time to detect policy violations. These snippets are retained for up to 30 days for safety review, then permanently deleted.",
   },
   {
-    question: "Is anything recorded?",
+    question: "What happens if someone harasses me during a call?",
     answer:
-      "No. Video and audio are live-only and are never recorded, stored, or replayed — not by us, not by any third party. When the call ends, it's gone. Our Chemistry Replay Vault stores only text-based session notes and AI-generated insights. We take a strong stance: no recordings, ever.",
+      "Tap the exit button to leave immediately — no explanation needed. Our AI monitors calls in real time and can flag concerning behaviour automatically. You can also report a user after any call. Every report is reviewed, and every moderation decision can be appealed.",
   },
   {
-    question: "How does Spark work?",
+    question: "What is a Drop?",
     answer:
-      "At the end of a 45-second anonymous video call, both people independently choose Spark or Pass. This decision is private and resolved server-side. If both choose Spark, identities are revealed and chat is unlocked. If either person passes, neither person ever learns the other's choice. There are no rejection notifications — just dignity.",
+      "A Drop is a scheduled, themed speed-dating session. Examples include Night Owls (late evening), Over 35, Creatives & Makers, and Introvert Hours. You RSVP to a Drop, and when it starts, you're matched with verified strangers for 45-second anonymous video calls.",
   },
   {
-    question: "How do you verify 18+?",
+    question: "What happens after a call?",
     answer:
-      "We require age verification before you can join any Drop. We verify your age but store only your verification status — never your identity documents. This ensures all participants are adults while respecting your privacy.",
+      "After each 45-second call, both you and the other person independently choose Spark (interested) or Pass (not interested). If you both choose Spark, your identities are revealed and a private chat opens. If either person chooses Pass, neither person is notified — there is no rejection notification. Dignity, always.",
   },
   {
-    question: "What data do you keep?",
+    question: "How does identity verification work?",
     answer:
-      "We store your account information (email, display name, preferences), verification status, match history (mutual Sparks only), and chat messages. We do not store video, audio, identity documents, or any data about non-mutual interactions. You can read our full Privacy Policy for details, and you can delete your account and all associated data at any time.",
+      "Every member completes a safety pledge and age verification during onboarding. You must be 18 or older to use Verity.",
   },
   {
-    question: "How do you handle bad actors?",
+    question: "What is the Chemistry Replay Vault?",
     answer:
-      "We use AI moderation during live sessions to detect policy violations in real time. Any user can exit a call or file a report with a single tap. Reports are reviewed by our team. Violations of our zero-tolerance policy result in immediate suspension. Users who are actioned can appeal to a human reviewer.",
+      "The Replay Vault stores text-based AI session notes and conversation timestamps from your calls — never video or audio. It helps you remember the moments that mattered between Drops.",
   },
   {
-    question: "Can I delete my data?",
+    question: "What is Guardian Net?",
     answer:
-      "Yes. You can delete your account and all associated data at any time through the Settings page. This includes your profile, match history, messages, and any vault entries. Deletion is permanent and cannot be undone.",
+      "Guardian Net lets you broadcast a one-tap safety signal to a trusted contact before a call: 'I'm in a Verity call until [time].' Your contact knows you're safe without needing your location.",
+  },
+  {
+    question: "Is Verity free?",
+    answer:
+      "Yes. The free tier includes Drops, 45-second calls, mutual Spark matching, and AI moderation. Verity Pass (A$9.99/month for founding members) adds the Chemistry Replay Vault, Spark Reflection insights, expanded Guardian Net, and priority Drop access.",
+  },
+  {
+    question: "Can I use Verity outside major cities?",
+    answer:
+      "Yes. Verity is fully online — all you need is a stable internet connection. Drops are themed by interest and energy, not geography. Our early Drops focus on Australian time zones.",
+  },
+  {
+    question: "What happens to my data if I delete my account?",
+    answer:
+      "All personal data is removed. Any retained call metadata from the previous 30 days is permanently deleted. Verity does not sell or share personal data with third parties.",
   },
 ];
 
