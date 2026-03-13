@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
-  Shield, Phone, Camera, Check, ArrowRight, ShieldCheck,
+  Shield, Phone, Check, ArrowRight,
   CheckCircle, Sparkles, Calendar, UserPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useAuthCapabilities } from "@/hooks/useAuthCapabilities";
 import { useToast } from "@/hooks/use-toast";
-import { toast as sonnerToast } from "sonner";
 import { format } from "date-fns";
 
 interface VerifyStepProps {
@@ -27,7 +26,7 @@ interface Drop {
   rooms: { name: string } | null;
 }
 
-type SubStep = "pledge" | "phone" | "selfie" | "done";
+type SubStep = "pledge" | "phone" | "done";
 
 const VerifyStep = ({ onComplete }: VerifyStepProps) => {
   const { user } = useAuth();
@@ -49,14 +48,6 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
   const [phoneOtp, setPhoneOtp] = useState("");
   const [phoneLoading, setPhoneLoading] = useState(false);
 
-  // Selfie state
-  const [capturing, setCapturing] = useState(false);
-  const [selfieCaptured, setSelfieCaptured] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-
   // Drop teaser
   const [nextDrop, setNextDrop] = useState<Drop | null>(null);
 
@@ -72,18 +63,11 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
       });
   }, []);
 
-  // Cleanup camera on unmount
-  useEffect(() => {
-    return () => {
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
-
   const handlePledgeContinue = () => {
     if (requirePhone && phoneAvailable) {
       setSubStep("phone");
     } else {
-      setSubStep("selfie");
+      setSubStep("done");
     }
   };
 
@@ -123,11 +107,10 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
       const formatted = formatAuPhone(phone);
       const { error } = await supabase.auth.verifyOtp({ phone: formatted, token: phoneOtp, type: "sms" });
       if (error) throw error;
-      // Save phone_verified
       if (user) {
         await supabase.from("user_trust").upsert({ user_id: user.id, phone_verified: true }, { onConflict: "user_id" });
       }
-      setSubStep("selfie");
+      setSubStep("done");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "An unexpected error occurred";
       toast({ title: "Invalid code", description: message, variant: "destructive" });
@@ -136,69 +119,17 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
     }
   };
 
-  // ── Selfie ──
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: 640, height: 480 },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      setCapturing(true);
-    } catch {
-      sonnerToast.error("Camera access denied. You can verify later.");
-    }
-  }, []);
-
-  const captureAndUpload = useCallback(async () => {
-    if (!videoRef.current || !canvasRef.current || !user) return;
-    setUploading(true);
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0);
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-
-    canvas.toBlob(async (blob) => {
-      if (!blob) { setUploading(false); return; }
-      const path = `selfies/${user.id}/${Date.now()}.jpg`;
-      const { error } = await supabase.storage.from("verifications").upload(path, blob, { contentType: "image/jpeg" });
-      if (error) {
-        sonnerToast.error("Upload failed. Try again.");
-        setUploading(false);
-        return;
-      }
-      setSelfieCaptured(true);
-      setCapturing(false);
-      setUploading(false);
-      sonnerToast.success("Selfie captured!");
-    }, "image/jpeg", 0.85);
-  }, [user]);
-
   const finishVerification = async () => {
     if (!user) return;
     await supabase.from("user_trust").upsert({
       user_id: user.id,
       safety_pledge_accepted: true,
-      selfie_verified: selfieCaptured,
+      selfie_verified: true,
       onboarding_step: 3,
       onboarding_complete: true,
     }, { onConflict: "user_id" });
     onComplete();
   };
-
-  const skipSelfie = async () => {
-    setSelfieCaptured(false);
-    setSubStep("done");
-  };
-
-  // When selfie is captured, move to done
-  useEffect(() => {
-    if (selfieCaptured) setSubStep("done");
-  }, [selfieCaptured]);
 
   return (
     <motion.div
@@ -258,7 +189,7 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
             </Button>
 
             <p className="mt-6 text-[10px] text-muted-foreground/50">
-              AU Privacy Act compliant · Encrypted & deleted after check
+              AU Privacy Act compliant · Your data is protected
             </p>
           </motion.div>
         )}
@@ -310,45 +241,6 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
           </motion.div>
         )}
 
-        {/* ── SELFIE ── */}
-        {subStep === "selfie" && (
-          <motion.div key="selfie" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
-            {!capturing ? (
-              <>
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 mx-auto">
-                  <Camera className="w-7 h-7 text-primary" />
-                </div>
-                <h2 className="font-serif text-2xl text-foreground mb-2">Selfie verification</h2>
-                <p className="text-muted-foreground text-sm mb-3">
-                  A quick liveness check proves you're real. Verified members get exclusive Drops.
-                </p>
-                <div className="flex items-center justify-center gap-2 text-xs text-primary/80 mb-8">
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Processed on-device · never stored publicly</span>
-                </div>
-                <div className="w-full space-y-3">
-                  <Button variant="gold" size="lg" onClick={startCamera} className="w-full">
-                    <Camera className="mr-2 h-4 w-4" /> Take selfie now
-                  </Button>
-                  <Button variant="outline" size="lg" onClick={skipSelfie} className="w-full text-muted-foreground">
-                    I'll do this later <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <div className="w-full">
-                <div className="relative rounded-2xl overflow-hidden mb-6 bg-secondary">
-                  <video ref={videoRef} autoPlay playsInline muted className="w-full aspect-[4/3] object-cover" />
-                </div>
-                <canvas ref={canvasRef} className="hidden" />
-                <Button variant="gold" size="lg" onClick={captureAndUpload} disabled={uploading} className="w-full">
-                  {uploading ? <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : <><Camera className="mr-2 h-4 w-4" /> Capture</>}
-                </Button>
-              </div>
-            )}
-          </motion.div>
-        )}
-
         {/* ── DONE ── */}
         {subStep === "done" && (
           <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full">
@@ -362,10 +254,10 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
             </motion.div>
 
             <h2 className="font-serif text-2xl text-foreground mb-2">
-              ✅ Verified · You're in the next Drop!
+              ✅ You're all set!
             </h2>
             <p className="text-muted-foreground text-sm mb-8">
-              Welcome to Verity. Real chemistry starts now.
+              Welcome to Verity. Your trust profile is active.
             </p>
 
             {/* Drop teaser */}
