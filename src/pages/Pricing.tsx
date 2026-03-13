@@ -18,7 +18,7 @@ const tiers = [
       "Spark / Pass with mutual reveal",
       "Text chat with mutual Sparks",
       "One-tap exit + report",
-      "AI moderation protection",
+      "AI moderation — active from first Drop",
     ],
     cta: "Get started",
     variant: "gold-outline" as const,
