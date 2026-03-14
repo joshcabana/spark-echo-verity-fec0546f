@@ -12,7 +12,7 @@ const steps = [
     step: "01",
     title: "RSVP to a Drop",
     description:
-      "Choose a themed, scheduled session that fits your energy — Night Owls, Creatives, Over 35, and more. Drops happen at set times, so there's no endless browsing.",
+      "Choose a themed, scheduled session that fits your energy. Drops happen at set times, so there's no endless browsing.",
     detail: "Each Drop has limited spots and a clear start time. No infinite scroll, no swiping — just a calm, intentional decision to show up.",
   },
   {
