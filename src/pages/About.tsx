@@ -92,19 +92,19 @@ const About = () => {
             </h2>
             <ul className="space-y-3 text-muted-foreground">
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Mutual consent only.</strong> Both people choose Spark independently. No rejection signals are ever sent.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Privacy by default.</strong> Anonymous until mutual spark. Raw call video is never stored.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Safety first.</strong> 18+ verification, AI moderation, and one-tap Guardian Net safety alerts.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Radical transparency.</strong> We commit to publishing live safety stats from the moment our first Drop runs.</span>
               </li>
             </ul>
