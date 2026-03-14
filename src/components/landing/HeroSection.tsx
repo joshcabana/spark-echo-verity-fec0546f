@@ -1,50 +1,21 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowRight, Mail, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import FeaturedDropPanel from "@/components/landing/FeaturedDropPanel";
+import { Button } from "@/components/ui/button";
+import { usePublicDrops } from "@/hooks/usePublicDrops";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
+import { getFeaturedDrop } from "@/lib/dropSchedule";
 
-const trustChips = ["18+ verified", "No video stored", "Mutual consent only"];
+const trustChips = ["18+ verified", "45-second calls", "Raw video never stored"];
 
 const HeroSection = () => {
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const { toast } = useToast();
-
-  const handleWaitlist = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from("waitlist" as any)
-        .insert({ email: email.trim().toLowerCase() } as any);
-      if (error) {
-        if (error.code === "23505") {
-          toast({ title: "You're already on the list", description: "We'll email you when the first Drop goes live." });
-          setSubmitted(true);
-          return;
-        }
-        throw error;
-      }
-      setSubmitted(true);
-      toast({ title: "You're on the waitlist!", description: "We'll be in touch soon." });
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong";
-      toast({ title: "Oops", description: message, variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: drops = [], error, isLoading } = usePublicDrops();
+  const featuredDrop = getFeaturedDrop(drops);
 
   return (
-    <section className="relative min-h-[85vh] flex items-start justify-center overflow-hidden pt-28 md:pt-32">
-      {/* Background video */}
+    <section className="relative flex min-h-[85vh] items-start justify-center overflow-hidden pt-28 md:pt-32">
       <div className="absolute inset-0">
         <video
           autoPlay
@@ -52,126 +23,130 @@ const HeroSection = () => {
           loop
           playsInline
           preload="auto"
-          className="w-full h-full object-cover opacity-40 hidden md:block"
+          className="hidden h-full w-full object-cover opacity-40 md:block"
           poster=""
         >
-          <source src="https://cdn.jsdelivr.net/gh/joshcabana/GetVerity.1@main/public/videos/verity-hero-background.mp4" type="video/mp4" />
+          <source
+            src="https://cdn.jsdelivr.net/gh/joshcabana/GetVerity.1@main/public/videos/verity-hero-background.mp4"
+            type="video/mp4"
+          />
         </video>
-        {/* Mobile fallback - dark gradient only */}
         <div className="absolute inset-0 bg-background md:hidden" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
       </div>
 
-      <div className="relative z-10 container max-w-4xl mx-auto px-6 pt-20 text-center">
-        {/* Trust chips */}
+      <div className="relative z-10 container mx-auto max-w-5xl px-6 pt-20 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="flex flex-wrap items-center justify-center gap-2 mb-8"
+          className="mb-8 flex flex-wrap items-center justify-center gap-2"
         >
           {trustChips.map((chip) => (
             <span
               key={chip}
-              className="text-[10px] tracking-luxury uppercase text-primary/80 border border-primary/20 px-3 py-1.5 rounded-full"
+              className="rounded-full border border-primary/20 px-3 py-1.5 text-[10px] uppercase tracking-luxury text-primary/80"
             >
               {chip}
             </span>
           ))}
         </motion.div>
 
-        {/* Headline */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4 }}
-          className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1] mb-8 text-foreground"
+          transition={{ duration: 1, delay: 0.35 }}
+          className="mb-8 font-serif text-4xl leading-[1.05] text-foreground sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          Meet someone real
+          Anonymous first.
           <br />
-          <span className="text-gold-gradient italic">in 45 seconds.</span>
+          <span className="text-gold-gradient italic">Mutual reveal only.</span>
         </motion.h1>
 
-        {/* Sub */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 font-light leading-relaxed"
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="mx-auto mb-10 max-w-3xl text-lg font-light leading-relaxed text-muted-foreground md:text-xl"
         >
-          No profiles. No swiping. Just eyes and voice with a verified stranger
-          — then you both choose. Spark or walk. Dignity either way.
+          RSVP to a scheduled Drop, meet one verified stranger in a 45-second anonymised video call,
+          then both choose Spark or Pass. Raw video and audio are never stored.
         </motion.p>
 
-        {/* Waitlist CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1 }}
-          className="max-w-lg mx-auto"
+          transition={{ duration: 0.8, delay: 0.9 }}
+          className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
         >
-          {!submitted ? (
-            <form
-              onSubmit={handleWaitlist}
-              className="flex flex-col sm:flex-row items-stretch gap-3"
-            >
-              <div className="relative flex-1">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="you@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-11 h-12 bg-card border-border"
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                variant="gold"
-                size="lg"
-                className="group h-12 whitespace-nowrap"
-                disabled={loading || !email.trim()}
-              >
-                {loading ? (
-                  <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    Join the waitlist
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </>
-                )}
-              </Button>
-            </form>
-          ) : (
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-start gap-3 text-left">
-              <CheckCircle className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" />
-              <p className="text-sm text-foreground">
-                You're on the list. We'll email you when the first Drop goes live.
-              </p>
-            </div>
-          )}
-
-          <p className="mt-4 text-xs text-muted-foreground/60">
-            Already have an account?{" "}
-            <Link to="/auth" className="text-primary hover:text-primary/80 transition-colors">
-              Sign in
+          <Button
+            asChild
+            variant="gold"
+            size="xl"
+            className="group w-full sm:w-auto"
+            onClick={() =>
+              trackEvent(ANALYTICS_EVENTS.landingPrimaryCtaClicked, {
+                source: "hero",
+                featured_drop_id: featuredDrop?.id ?? null,
+              })
+            }
+          >
+            <Link to="/onboarding">
+              Get verified for the first Drop
+              <ArrowRight className="transition-transform group-hover:translate-x-1" />
             </Link>
-          </p>
+          </Button>
+
+          <Button asChild variant="gold-outline" size="xl" className="w-full sm:w-auto">
+            <Link to="/how-it-works">How it works</Link>
+          </Button>
         </motion.div>
 
-        {/* Trust line */}
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.1 }}
+          className="mx-auto max-w-4xl"
+        >
+          <FeaturedDropPanel
+            drop={featuredDrop}
+            errorMessage={error instanceof Error ? error.message : null}
+            isLoading={isLoading}
+          />
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.35 }}
+          className="mt-6 text-xs text-muted-foreground/70"
+        >
+          <CheckCircle2 className="mr-1 inline h-3.5 w-3.5 text-primary/80" />
+          Safety transcript snippets and call metadata may be retained for up to 30 days for moderation review.
+        </motion.p>
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1.5 }}
-          className="mt-16 text-xs text-muted-foreground/60 tracking-luxury uppercase"
+          className="mt-6 text-xs uppercase tracking-luxury text-muted-foreground/60"
         >
-          Built by one person who was tired of what dating apps became.
+          Already have an account?{" "}
+          <Link to="/auth" className="text-primary transition-colors hover:text-primary/80">
+            Sign in
+          </Link>
+        </motion.p>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1.65 }}
+          className="mt-12 text-xs uppercase tracking-luxury text-muted-foreground/60"
+        >
+          Built by one person in Canberra for people tired of what dating apps became.
         </motion.p>
       </div>
 
-      {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );

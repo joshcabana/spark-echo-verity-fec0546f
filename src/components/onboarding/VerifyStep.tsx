@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,17 +13,12 @@ import { useNavigate } from "react-router-dom";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useAuthCapabilities } from "@/hooks/useAuthCapabilities";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
+import { formatDropSchedule, getFeaturedDrop, type PublicDrop } from "@/lib/dropSchedule";
+import { usePublicDrops } from "@/hooks/usePublicDrops";
 
 interface VerifyStepProps {
   onComplete: () => void;
-}
-
-interface Drop {
-  id: string;
-  title: string;
-  scheduled_at: string;
-  rooms: { name: string } | null;
 }
 
 type SubStep = "pledge" | "phone" | "done";
@@ -34,6 +29,7 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
   const navigate = useNavigate();
   const { data: featureFlags } = useFeatureFlags();
   const { data: authCapabilities } = useAuthCapabilities();
+  const { data: drops = [] } = usePublicDrops();
 
   const requirePhone = featureFlags?.requirePhoneVerification ?? false;
   const phoneAvailable = authCapabilities?.phoneEnabled !== false;
@@ -48,20 +44,8 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
   const [phoneOtp, setPhoneOtp] = useState("");
   const [phoneLoading, setPhoneLoading] = useState(false);
 
-  // Drop teaser
-  const [nextDrop, setNextDrop] = useState<Drop | null>(null);
+  const nextDrop: PublicDrop | null = getFeaturedDrop(drops);
 
-  useEffect(() => {
-    supabase
-      .from("drops")
-      .select("id, title, scheduled_at, rooms(name)")
-      .eq("status", "upcoming")
-      .order("scheduled_at", { ascending: true })
-      .limit(1)
-      .then(({ data }) => {
-        if (data && data.length > 0) setNextDrop(data[0] as unknown as Drop);
-      });
-  }, []);
 
   const handlePledgeContinue = () => {
     if (requirePhone && phoneAvailable) {
@@ -128,6 +112,10 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
       onboarding_step: 3,
       onboarding_complete: true,
     }, { onConflict: "user_id" });
+    trackEvent(ANALYTICS_EVENTS.onboardingCompleted, {
+      next_drop_id: nextDrop?.id ?? null,
+      phone_required: requirePhone && phoneAvailable,
+    });
     onComplete();
   };
 
@@ -257,7 +245,9 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
               ✅ You're all set!
             </h2>
             <p className="text-muted-foreground text-sm mb-8">
-              Welcome to Verity. Your trust profile is active.
+              {nextDrop
+                ? "Welcome to Verity. You're verified and ready for the next scheduled Drop."
+                : "Welcome to Verity. Your trust profile is active."}
             </p>
 
             {/* Drop teaser */}
@@ -271,7 +261,7 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
                 <p className="text-sm font-medium text-foreground">{nextDrop.title}</p>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  {format(new Date(nextDrop.scheduled_at), "EEE d MMM · h:mm a")}
+                  {formatDropSchedule(nextDrop)}
                 </p>
               </div>
             )}

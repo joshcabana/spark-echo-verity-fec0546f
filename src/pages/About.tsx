@@ -78,8 +78,8 @@ const About = () => {
               </p>
               <p>
                 Verity is the opposite: real eyes, real voice, 45 seconds, and dignity always.
-                No infinite scroll, no streaks, no dopamine loops. If there's no spark, there's no
-                trace. If there is — both people chose it.
+                No infinite scroll, no streaks, no dopamine loops. If there is no spark, the call
+                ends without identity reveal. If there is, both people chose it.
               </p>
             </div>
           </section>
@@ -92,19 +92,19 @@ const About = () => {
             </h2>
             <ul className="space-y-3 text-muted-foreground">
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Mutual consent only.</strong> Both people choose Spark independently. No rejection signals are ever sent.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Privacy by default.</strong> Anonymous until mutual spark. Raw call video is never stored.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Safety first.</strong> 18+ verification, AI moderation, and one-tap Guardian Net safety alerts.</span>
               </li>
               <li className="flex items-start gap-3">
-                <span className="text-primary mt-1">✦</span>
+                <span className="text-primary mt-1">❆</span>
                 <span><strong className="text-foreground">Radical transparency.</strong> We commit to publishing live safety stats from the moment our first Drop runs.</span>
               </li>
             </ul>
@@ -113,7 +113,7 @@ const About = () => {
           <div className="pt-6 border-t border-border/30 flex items-center gap-4">
             <span className="text-xs text-muted-foreground/60">🇦🇺 Built by one person in Australia</span>
             <span className="text-xs text-muted-foreground/40">·</span>
-            <span className="text-xs text-muted-foreground/60">18+ verified · Nothing stored until mutual Spark</span>
+            <span className="text-xs text-muted-foreground/60">18+ verified · No raw video or audio stored</span>
           </div>
 
           <div className="mt-8">

@@ -10,6 +10,7 @@ import MessageBubble from "@/components/chat/MessageBubble";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatComposer from "@/components/chat/ChatComposer";
 import VoiceIntroBanner from "@/components/chat/VoiceIntroBanner";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 
 const TYPING_TIMEOUT = 3000;
 
@@ -171,8 +172,12 @@ const Chat = () => {
       toast.error("Failed to submit report.");
       return;
     }
+    trackEvent(ANALYTICS_EVENTS.reportSubmitted, {
+      source: "chat",
+      spark_id: sparkId,
+    });
     toast.success("Report submitted.");
-  }, [user, partnerId]);
+  }, [user, partnerId, sparkId]);
 
   const handleBlock = useCallback(async () => {
     if (!user || !partnerId || !sparkId) return;

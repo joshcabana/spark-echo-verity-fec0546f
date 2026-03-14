@@ -16,6 +16,7 @@ import MutualSparkReveal from "@/components/call/MutualSparkReveal";
 import VoiceIntro from "@/components/call/VoiceIntro";
 import SparkReflection from "@/components/call/SparkReflection";
 import { useAgoraCall } from "@/hooks/useAgoraCall";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 import { isModerationFlagged } from "@/lib/moderation";
 
 type CallPhase =
@@ -173,11 +174,14 @@ const LiveCall = () => {
   // When Agora joins, start the live phase
   useEffect(() => {
     if (isJoined && phase === "connecting") {
+      trackEvent(ANALYTICS_EVENTS.callStarted, {
+        call_id: callId ?? null,
+      });
       // Small delay for connecting animation
       const t = setTimeout(() => setPhase("live"), 1500);
       return () => clearTimeout(t);
     }
-  }, [isJoined, phase]);
+  }, [isJoined, phase, callId]);
 
   // Cloud recording removed — Verity never stores video (guardrail)
 
@@ -288,6 +292,9 @@ const LiveCall = () => {
   // Handle choice: write to calls table
   const handleChoice = useCallback(async (choice: "spark" | "pass") => {
     if (!callId || !myRole) return;
+    trackEvent(choice === "spark" ? ANALYTICS_EVENTS.sparkChosen : ANALYTICS_EVENTS.passChosen, {
+      call_id: callId,
+    });
     setMyChoice(choice);
     setPhase("waiting");
 
@@ -370,6 +377,10 @@ const LiveCall = () => {
       toast.error("Failed to submit report.");
       return;
     }
+    trackEvent(ANALYTICS_EVENTS.reportSubmitted, {
+      source: "live_call",
+      call_id: callId,
+    });
     toast.success("Report submitted. Thank you for keeping Verity safe.");
     setReportOpen(false);
   }, [user, partnerId, callId]);

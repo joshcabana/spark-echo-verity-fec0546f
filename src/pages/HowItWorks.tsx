@@ -12,7 +12,7 @@ const steps = [
     step: "01",
     title: "RSVP to a Drop",
     description:
-      "Choose a themed, scheduled session that fits your energy — Night Owls, Creatives, Over 35, and more. Drops happen at set times, so there's no endless browsing.",
+      "Choose a themed, scheduled session that fits your energy. Drops happen at set times, so there's no endless browsing.",
     detail: "Each Drop has limited spots and a clear start time. No infinite scroll, no swiping — just a calm, intentional decision to show up.",
   },
   {
@@ -29,7 +29,7 @@ const steps = [
     title: "Both choose Spark or Pass",
     description:
       "Independently and privately. No rejection notifications — ever. Zero ego damage by design.",
-    detail: "Neither person ever learns the other's choice unless it's mutual. The server resolves decisions privately. If there's no Spark, there's no trace.",
+    detail: "Neither person ever learns the other's choice unless it's mutual. The server resolves decisions privately. If there is no Spark, raw video and audio end immediately while safety transcript snippets and call metadata may be retained for up to 30 days for moderation review.",
   },
   {
     icon: MessageCircle,
