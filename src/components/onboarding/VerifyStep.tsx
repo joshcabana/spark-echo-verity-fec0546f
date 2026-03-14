@@ -21,13 +21,6 @@ interface VerifyStepProps {
   onComplete: () => void;
 }
 
-interface Drop {
-  id: string;
-  title: string;
-  scheduled_at: string;
-  rooms: { name: string } | null;
-}
-
 type SubStep = "pledge" | "phone" | "done";
 
 const VerifyStep = ({ onComplete }: VerifyStepProps) => {
