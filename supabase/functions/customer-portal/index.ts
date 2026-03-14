@@ -4,7 +4,7 @@ import Stripe from "https://esm.sh/stripe@14.21.0";
 import { resolveSafeReturnUrl } from "../_shared/url-validation.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://getverity.com.au",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 

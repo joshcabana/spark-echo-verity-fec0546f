@@ -207,6 +207,9 @@ const LiveCall = () => {
     const SpeechRecognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setTranscriptAvailable(false);
+      toast.info("Your browser doesn't support live speech analysis. Voice moderation will use metadata checks only. For full safety coverage, use Chrome or Edge.", {
+        duration: 8000,
+      });
       return;
     }
 

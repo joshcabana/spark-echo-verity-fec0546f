@@ -166,7 +166,7 @@ const TokenShop = () => {
                     </div>
                   </div>
 
-                  <p className="text-xs text-muted-foreground/50 mb-4">Good for {pack.entries} lobby entries</p>
+                  <p className="text-xs text-muted-foreground/50 mb-4">Use for Spark Extensions and premium features</p>
 
                   <div className="w-full h-[3px] rounded-full bg-secondary/60 overflow-hidden mb-5">
                     <motion.div
