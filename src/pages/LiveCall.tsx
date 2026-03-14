@@ -292,6 +292,9 @@ const LiveCall = () => {
   // Handle choice: write to calls table
   const handleChoice = useCallback(async (choice: "spark" | "pass") => {
     if (!callId || !myRole) return;
+    trackEvent(choice === "spark" ? ANALYTICS_EVENTS.sparkChosen : ANALYTICS_EVENTS.passChosen, {
+      call_id: callId,
+    });
     setMyChoice(choice);
     setPhase("waiting");
 
