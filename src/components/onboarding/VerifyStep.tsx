@@ -44,20 +44,8 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
   const [phoneOtp, setPhoneOtp] = useState("");
   const [phoneLoading, setPhoneLoading] = useState(false);
 
-  // Drop teaser
-  const [nextDrop, setNextDrop] = useState<Drop | null>(null);
+  const nextDrop: PublicDrop | null = getFeaturedDrop(drops);
 
-  useEffect(() => {
-    supabase
-      .from("drops")
-      .select("id, title, scheduled_at, rooms(name)")
-      .eq("status", "upcoming")
-      .order("scheduled_at", { ascending: true })
-      .limit(1)
-      .then(({ data }) => {
-        if (data && data.length > 0) setNextDrop(data[0] as unknown as Drop);
-      });
-  }, []);
 
   const handlePledgeContinue = () => {
     if (requirePhone && phoneAvailable) {
