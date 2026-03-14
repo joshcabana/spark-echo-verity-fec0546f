@@ -1323,6 +1323,23 @@ export type Database = {
       }
       delete_my_account: { Args: never; Returns: undefined }
       get_drop_rsvp_count: { Args: { _drop_id: string }; Returns: number }
+      get_public_drop_schedule: {
+        Args: never
+        Returns: {
+          description: string
+          duration_minutes: number
+          id: string
+          is_friendfluence: boolean
+          max_capacity: number
+          room_id: string
+          room_name: string
+          rsvp_count: number
+          scheduled_at: string
+          status: string
+          timezone: string
+          title: string
+        }[]
+      }
       get_spark_partner_profile: {
         Args: { _partner_user_id: string }
         Returns: {
