@@ -18,7 +18,7 @@ const tokenPacks = [
 
 const passPerks = [
   { icon: Zap, text: "Priority matchmaking — top of every room" },
-  { icon: Coins, text: "Unlimited free lobby entries" },
+  { icon: Coins, text: "5 bonus tokens every month" },
   { icon: Sparkles, text: "One free Spark Extension every day" },
   { icon: Star, text: "Access to all premium rooms" },
   { icon: Crown, text: "Ad-free experience, always" },
