@@ -78,8 +78,8 @@ const About = () => {
               </p>
               <p>
                 Verity is the opposite: real eyes, real voice, 45 seconds, and dignity always.
-                No infinite scroll, no streaks, no dopamine loops. If there's no spark, there's no
-                trace. If there is — both people chose it.
+                No infinite scroll, no streaks, no dopamine loops. If there is no spark, the call
+                ends without identity reveal. If there is, both people chose it.
               </p>
             </div>
           </section>
