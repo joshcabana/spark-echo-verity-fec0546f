@@ -16,6 +16,7 @@ import MutualSparkReveal from "@/components/call/MutualSparkReveal";
 import VoiceIntro from "@/components/call/VoiceIntro";
 import SparkReflection from "@/components/call/SparkReflection";
 import { useAgoraCall } from "@/hooks/useAgoraCall";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 import { isModerationFlagged } from "@/lib/moderation";
 
 type CallPhase =
