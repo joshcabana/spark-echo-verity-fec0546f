@@ -172,8 +172,12 @@ const Chat = () => {
       toast.error("Failed to submit report.");
       return;
     }
+    trackEvent(ANALYTICS_EVENTS.reportSubmitted, {
+      source: "chat",
+      spark_id: sparkId,
+    });
     toast.success("Report submitted.");
-  }, [user, partnerId]);
+  }, [user, partnerId, sparkId]);
 
   const handleBlock = useCallback(async () => {
     if (!user || !partnerId || !sparkId) return;

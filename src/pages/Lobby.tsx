@@ -135,6 +135,9 @@ const Lobby = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      trackEvent(ANALYTICS_EVENTS.dropRsvpCreated, {
+        source: "lobby",
+      });
       queryClient.invalidateQueries({ queryKey: ["my-rsvps"] });
       queryClient.invalidateQueries({ queryKey: ["rsvp-counts"] });
     },

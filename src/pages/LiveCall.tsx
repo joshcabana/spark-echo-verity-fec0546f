@@ -377,6 +377,10 @@ const LiveCall = () => {
       toast.error("Failed to submit report.");
       return;
     }
+    trackEvent(ANALYTICS_EVENTS.reportSubmitted, {
+      source: "live_call",
+      call_id: callId,
+    });
     toast.success("Report submitted. Thank you for keeping Verity safe.");
     setReportOpen(false);
   }, [user, partnerId, callId]);
