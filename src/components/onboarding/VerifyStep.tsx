@@ -13,7 +13,9 @@ import { useNavigate } from "react-router-dom";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { useAuthCapabilities } from "@/hooks/useAuthCapabilities";
 import { useToast } from "@/hooks/use-toast";
-import { format } from "date-fns";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
+import { formatDropSchedule, getFeaturedDrop, type PublicDrop } from "@/lib/dropSchedule";
+import { usePublicDrops } from "@/hooks/usePublicDrops";
 
 interface VerifyStepProps {
   onComplete: () => void;
