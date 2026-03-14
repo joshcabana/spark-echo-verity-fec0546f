@@ -13,7 +13,7 @@ interface ExcitementStepProps {
 
 const TRUST_BULLETS = [
   { icon: Eye, label: "Anonymous until mutual spark", desc: "Neither person sees names or photos until both say yes." },
-  { icon: Shield, label: "Nothing stored if no connection", desc: "No match? No trace. Your dignity is non-negotiable." },
+  { icon: Shield, label: "No raw video or audio stored", desc: "Calls are live-only. Safety transcript snippets and call metadata may be retained for up to 30 days." },
   { icon: UserCheck, label: "Verified 18+ members only", desc: "Every member is ID-verified. No bots. No catfish." },
 ];
 

@@ -30,8 +30,8 @@ const Landing = () => {
       <BetaBanner />
       <Navbar />
       <HeroSection />
-      <StatsSection />
       <HowItWorksSection />
+      <StatsSection />
       <PromoVideoSection />
       <FeaturesSection />
       <TrustSection />

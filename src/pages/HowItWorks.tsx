@@ -29,7 +29,7 @@ const steps = [
     title: "Both choose Spark or Pass",
     description:
       "Independently and privately. No rejection notifications — ever. Zero ego damage by design.",
-    detail: "Neither person ever learns the other's choice unless it's mutual. The server resolves decisions privately. If there's no Spark, there's no trace.",
+    detail: "Neither person ever learns the other's choice unless it's mutual. The server resolves decisions privately. If there is no Spark, raw video and audio end immediately while safety transcript snippets and call metadata may be retained for up to 30 days for moderation review.",
   },
   {
     icon: MessageCircle,

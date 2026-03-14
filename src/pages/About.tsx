@@ -113,7 +113,7 @@ const About = () => {
           <div className="pt-6 border-t border-border/30 flex items-center gap-4">
             <span className="text-xs text-muted-foreground/60">🇦🇺 Built by one person in Australia</span>
             <span className="text-xs text-muted-foreground/40">·</span>
-            <span className="text-xs text-muted-foreground/60">18+ verified · Nothing stored until mutual Spark</span>
+            <span className="text-xs text-muted-foreground/60">18+ verified · No raw video or audio stored</span>
           </div>
 
           <div className="mt-8">

@@ -1,74 +1,65 @@
 import { motion } from "framer-motion";
-import { CalendarCheck, Video, Sparkles, MessageCircle } from "lucide-react";
+import { CalendarCheck, Sparkles, Video } from "lucide-react";
 
 const steps = [
   {
     icon: CalendarCheck,
     step: "1",
-    title: "RSVP to a Drop",
-    description: "Choose a themed, scheduled session that fits your energy — Night Owls, Creatives, Over 35, and more.",
+    title: "Choose your Drop",
+    description: "Pick the next scheduled room and verify once so you're ready when it opens.",
   },
   {
     icon: Video,
     step: "2",
-    title: "Join the 45-second anonymous video call",
-    description: "No profiles, no photos. Just real eyes and voice with a stranger for 45 seconds.",
+    title: "45-second anonymous call",
+    description: "Meet one verified stranger at a time with no profiles, no swiping, and no raw video storage.",
   },
   {
     icon: Sparkles,
     step: "3",
-    title: "Both choose Spark or Pass",
-    description: "Independently and privately. No rejection notifications — ever. Zero ego damage by design.",
-  },
-  {
-    icon: MessageCircle,
-    step: "4",
-    title: "Mutual sparks unlock chat",
-    description: "Only when both choose Spark do identities reveal. Then voice intros and text chat open up.",
+    title: "Spark or Pass",
+    description: "Decide privately. Only mutual Sparks reveal identity and unlock chat after the call.",
   },
 ];
 
 const HowItWorksSection = () => {
   return (
-    <section id="how-it-works" className="py-24 md:py-32">
-      <div className="container max-w-5xl mx-auto px-6">
+    <section id="how-it-works" className="py-24 md:py-28">
+      <div className="container mx-auto max-w-5xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-16"
+          className="mb-16 text-center"
         >
-          <span className="text-xs tracking-luxury uppercase text-primary/60 mb-4 block">
-            How it works
-          </span>
-          <h2 className="font-serif text-3xl md:text-4xl lg:text-5xl text-foreground">
-            Four steps. No games.
+          <span className="mb-4 block text-xs uppercase tracking-luxury text-primary/60">What happens next</span>
+          <h2 className="font-serif text-3xl text-foreground md:text-4xl lg:text-5xl">
+            Three steps. No swiping.
           </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+            Verity is structured on purpose. You know when the room opens, what the call lasts, and how identity reveal works before you join.
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((item, i) => (
+        <div className="grid gap-6 md:grid-cols-3">
+          {steps.map((item, index) => (
             <motion.div
               key={item.step}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="relative bg-card border border-border rounded-lg p-6 hover:border-primary/20 transition-all duration-500"
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="rounded-2xl border border-border bg-card p-6 transition-all duration-500 hover:border-primary/20"
             >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-serif text-primary">{item.step}</span>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                  <span className="font-serif text-base text-primary">{item.step}</span>
                 </div>
-                <item.icon className="w-5 h-5 text-primary/60" />
+                <item.icon className="h-5 w-5 text-primary/70" />
               </div>
-              <h3 className="font-serif text-lg text-foreground mb-2">
-                {item.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {item.description}
-              </p>
+              <h3 className="font-serif text-xl text-foreground">{item.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.description}</p>
             </motion.div>
           ))}
         </div>

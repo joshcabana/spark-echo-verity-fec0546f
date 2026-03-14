@@ -40,7 +40,7 @@ const Footer = () => {
         {/* Trust signals */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 pt-6 border-t border-border/30">
           <span className="text-xs text-muted-foreground/60">
-            18+ verified · Nothing stored until mutual Spark
+            18+ verified · No raw video or audio stored
           </span>
           <span className="text-xs text-muted-foreground/40 hidden sm:inline">
             ·
