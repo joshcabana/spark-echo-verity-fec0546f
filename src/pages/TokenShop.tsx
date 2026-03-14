@@ -11,14 +11,14 @@ import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const tokenPacks = [
-  { id: "starter", name: "Starter", tokens: 10, price: "$4.90", entries: 10, badge: null, price_id: "price_1T6rXLC1O032lUHcL3kvvio4" },
-  { id: "popular", name: "Popular", tokens: 15, price: "$6.90", entries: 15, badge: "Most popular", price_id: "price_1T6rYJC1O032lUHc3fO3j6R6" },
-  { id: "value", name: "Value", tokens: 30, price: "$11.90", entries: 30, badge: "Best value", price_id: "price_1T6rZ0C1O032lUHciuLq0TXN" },
+  { id: "starter", name: "Starter", tokens: 10, price: "$4.90", badge: null, price_id: "price_1T6rXLC1O032lUHcL3kvvio4" },
+  { id: "popular", name: "Popular", tokens: 15, price: "$6.90", badge: "Most popular", price_id: "price_1T6rYJC1O032lUHc3fO3j6R6" },
+  { id: "value", name: "Value", tokens: 30, price: "$11.90", badge: "Best value", price_id: "price_1T6rZ0C1O032lUHciuLq0TXN" },
 ] as const;
 
 const passPerks = [
   { icon: Zap, text: "Priority matchmaking — top of every room" },
-  { icon: Coins, text: "Unlimited free lobby entries" },
+  { icon: Coins, text: "5 bonus tokens every month" },
   { icon: Sparkles, text: "One free Spark Extension every day" },
   { icon: Star, text: "Access to all premium rooms" },
   { icon: Crown, text: "Ad-free experience, always" },
@@ -166,7 +166,7 @@ const TokenShop = () => {
                     </div>
                   </div>
 
-                  <p className="text-xs text-muted-foreground/50 mb-4">Good for {pack.entries} lobby entries</p>
+                  <p className="text-xs text-muted-foreground/50 mb-4">Use for Spark Extensions and premium features</p>
 
                   <div className="w-full h-[3px] rounded-full bg-secondary/60 overflow-hidden mb-5">
                     <motion.div

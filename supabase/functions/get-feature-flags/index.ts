@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { FEATURE_FLAGS_CONFIG_INVALID, parseFeatureFlagsRecord } from "./flags-parser.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "https://getverity.com.au",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
