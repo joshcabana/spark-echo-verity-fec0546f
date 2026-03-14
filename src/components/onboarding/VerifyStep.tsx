@@ -29,6 +29,7 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
   const navigate = useNavigate();
   const { data: featureFlags } = useFeatureFlags();
   const { data: authCapabilities } = useAuthCapabilities();
+  const { data: drops = [] } = usePublicDrops();
 
   const requirePhone = featureFlags?.requirePhoneVerification ?? false;
   const phoneAvailable = authCapabilities?.phoneEnabled !== false;
