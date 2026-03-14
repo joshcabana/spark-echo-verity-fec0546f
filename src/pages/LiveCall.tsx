@@ -174,11 +174,14 @@ const LiveCall = () => {
   // When Agora joins, start the live phase
   useEffect(() => {
     if (isJoined && phase === "connecting") {
+      trackEvent(ANALYTICS_EVENTS.callStarted, {
+        call_id: callId ?? null,
+      });
       // Small delay for connecting animation
       const t = setTimeout(() => setPhase("live"), 1500);
       return () => clearTimeout(t);
     }
-  }, [isJoined, phase]);
+  }, [isJoined, phase, callId]);
 
   // Cloud recording removed — Verity never stores video (guardrail)
 
