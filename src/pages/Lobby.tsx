@@ -17,6 +17,7 @@ import PullToRefreshIndicator from "@/components/PullToRefreshIndicator";
 import { usePullToRefresh } from "@/hooks/usePullToRefresh";
 import { isToday, isThisWeek } from "date-fns";
 import { toast } from "sonner";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 
 interface Drop {
   id: string;
