@@ -26,7 +26,7 @@ const safetyPoints = [
     icon: Shield,
     title: "Mutual consent reveal",
     description:
-      "Your identity is never revealed unless both people independently choose Spark. The server enforces this — it cannot be bypassed from the client. If there's no mutual Spark, there's no trace.",
+      "Your identity is never revealed unless both people independently choose Spark. The server enforces this — it cannot be bypassed from the client. Without mutual consent, identities stay private.",
   },
   {
     icon: UserCheck,

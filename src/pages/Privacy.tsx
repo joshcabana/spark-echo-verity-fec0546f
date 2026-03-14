@@ -19,7 +19,7 @@ const sections = [
   {
     title: "3. Data Storage & Retention",
     content:
-      "Data is stored on secure, encrypted servers. Call metadata is retained for moderation review and deleted within 30 days. If no mutual spark occurs, no trace of the call is kept. The Chemistry Replay Vault stores only text-based session notes, AI insights, and timestamps — no video or audio is ever recorded or stored.",
+      "Data is stored on secure, encrypted servers. Call metadata is retained for moderation review and deleted within 30 days. Without mutual Spark, identities remain private and no personal connection data is retained. The Chemistry Replay Vault stores only text-based session notes, AI insights, and timestamps — no video or audio is ever recorded or stored.",
   },
   {
     title: "4. Third-Party Services",
