@@ -112,6 +112,10 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
       onboarding_step: 3,
       onboarding_complete: true,
     }, { onConflict: "user_id" });
+    trackEvent(ANALYTICS_EVENTS.onboardingCompleted, {
+      next_drop_id: nextDrop?.id ?? null,
+      phone_required: requirePhone && phoneAvailable,
+    });
     onComplete();
   };
 
