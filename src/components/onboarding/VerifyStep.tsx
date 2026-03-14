@@ -245,7 +245,9 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
               ✅ You're all set!
             </h2>
             <p className="text-muted-foreground text-sm mb-8">
-              Welcome to Verity. Your trust profile is active.
+              {nextDrop
+                ? "Welcome to Verity. You're verified and ready for the next scheduled Drop."
+                : "Welcome to Verity. Your trust profile is active."}
             </p>
 
             {/* Drop teaser */}
@@ -259,7 +261,7 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
                 <p className="text-sm font-medium text-foreground">{nextDrop.title}</p>
                 <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  {format(new Date(nextDrop.scheduled_at), "EEE d MMM · h:mm a")}
+                  {formatDropSchedule(nextDrop)}
                 </p>
               </div>
             )}
