@@ -1653,6 +1653,7 @@ export type Database = {
       }
     }
     Functions: {
+      check_notification_cap: { Args: { p_user_id: string }; Returns: boolean }
       claim_match_candidate: {
         Args: { p_drop_id: string; p_user_id: string }
         Returns: {
