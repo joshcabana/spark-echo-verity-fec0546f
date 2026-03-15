@@ -31,19 +31,19 @@ export type DropAvailability = {
 };
 
 const DEFAULT_DROP_TIMEZONE = "Australia/Sydney";
+type PublicDropScheduleRow =
+  Database["public"]["Functions"]["get_public_drop_schedule"]["Returns"][number];
 
 export async function fetchPublicDrops(): Promise<PublicDrop[]> {
   const { supabase } = await import("@/integrations/supabase/client");
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await supabase.rpc("get_public_drop_schedule" as any);
+  const { data, error } = await supabase.rpc("get_public_drop_schedule");
 
   if (error) {
     throw error;
   }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return ((data ?? []) as any[]).map((drop: any) => ({
+  return (data ?? []).map((drop: PublicDropScheduleRow) => ({
     id: drop.id,
     title: drop.title,
     description: drop.description,
