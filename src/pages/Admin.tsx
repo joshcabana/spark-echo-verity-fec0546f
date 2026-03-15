@@ -35,6 +35,26 @@ import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
 import { Helmet } from "react-helmet-async";
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const formatRuntimeAlert = (alert: Tables<"runtime_alert_events">) => {
+  if (isRecord(alert.details)) {
+    for (const key of ["message", "error", "summary", "detail"]) {
+      const candidate = alert.details[key];
+      if (typeof candidate === "string" && candidate.trim()) {
+        return candidate;
+      }
+    }
+  }
+
+  const source = alert.event_source.replace(/_/g, " ");
+  const event = alert.event_type.replace(/_/g, " ");
+  const status = typeof alert.status_code === "number" ? `HTTP ${alert.status_code}` : null;
+
+  return [event, source, status].filter(Boolean).join(" · ");
+};
+
 const PilotMetrics = () => {
   const { data: callStats } = useQuery({
     queryKey: ["pilot-call-stats"],
@@ -225,12 +245,25 @@ const Admin = () => {
     queryKey: ["admin-room-stats"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("rooms")
-        .select("name, active_users")
-        .order("active_users", { ascending: false })
-        .limit(4);
+        .from("drops")
+        .select("rooms(name)")
+        .not("room_id", "is", null);
       if (error) throw error;
-      return data.map((r) => ({ name: r.name, value: r.active_users ?? 0 }));
+
+      const popularity = new Map<string, number>();
+
+      for (const drop of data) {
+        const room = Array.isArray(drop.rooms) ? drop.rooms[0] : drop.rooms;
+        const name = room?.name;
+        if (!name) continue;
+
+        popularity.set(name, (popularity.get(name) ?? 0) + 1);
+      }
+
+      return [...popularity.entries()]
+        .map(([name, value]) => ({ name, value }))
+        .sort((left, right) => right.value - left.value)
+        .slice(0, 4);
     },
   });
 
@@ -439,7 +472,7 @@ const Admin = () => {
     mutationFn: async ({ appealId, status }: { appealId: string; status: "upheld" | "denied" }) => {
       const { error } = await supabase
         .from("appeals")
-        .update({ status, reviewed_at: new Date().toISOString() })
+        .update({ status, resolved_at: new Date().toISOString() })
         .eq("id", appealId);
       if (error) throw error;
     },
@@ -492,7 +525,7 @@ const Admin = () => {
             )}
             {alerts.map((alert) => (
               <div key={alert.id} className="px-2 py-1.5 rounded-md bg-secondary/30">
-                <p className="text-[11px] text-foreground/80 leading-tight">{alert.message}</p>
+                <p className="text-[11px] text-foreground/80 leading-tight">{formatRuntimeAlert(alert)}</p>
                 <p className="text-[9px] text-muted-foreground/50 mt-0.5">
                   {new Date(alert.created_at).toLocaleString()}
                 </p>
@@ -618,7 +651,7 @@ const Admin = () => {
                       {appeals.map((appeal) => (
                         <TableRow key={appeal.id}>
                           <TableCell className="font-mono text-xs text-muted-foreground">{appeal.user_id.slice(0, 8)}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm max-w-xs truncate">{appeal.explanation}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm max-w-xs truncate">{appeal.appeal_text ?? "No reason provided"}</TableCell>
                           <TableCell className="text-muted-foreground/60 text-sm">{new Date(appeal.created_at).toLocaleDateString()}</TableCell>
                           <TableCell>
                             <Badge

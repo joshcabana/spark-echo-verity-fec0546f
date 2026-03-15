@@ -22,11 +22,11 @@ interface ModerationFlag {
 
 interface PastAppeal {
   id: string;
-  explanation: string;
+  appeal_text: string | null;
   status: "pending" | "upheld" | "denied";
   created_at: string;
-  admin_response: string | null;
-  flag_id: string | null;
+  resolution_text: string | null;
+  moderation_event_id: string;
 }
 
 const Appeal = () => {
@@ -61,7 +61,7 @@ const Appeal = () => {
         const { data: existingAppeal } = await supabase
           .from("appeals")
           .select("id")
-          .eq("flag_id", flags[0].id)
+          .eq("moderation_event_id", flags[0].id)
           .limit(1);
 
         if (cancelled) return;
@@ -73,12 +73,12 @@ const Appeal = () => {
       // Fetch past appeals
       const { data: appeals } = await supabase
         .from("appeals")
-        .select("id, explanation, status, created_at, admin_response, flag_id")
+        .select("id, appeal_text, status, created_at, resolution_text, moderation_event_id")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (cancelled) return;
-      setPastAppeals((appeals as PastAppeal[]) || []);
+      setPastAppeals((appeals ?? []) as PastAppeal[]);
       setLoading(false);
     };
 
@@ -96,8 +96,8 @@ const Appeal = () => {
 
       const res = await supabase.functions.invoke("submit-appeal", {
         body: {
-          explanation: explanation.trim(),
-          flag_id: pendingFlag.id,
+          appeal_text: explanation.trim(),
+          moderation_event_id: pendingFlag.id,
           voice_note_url: null,
         },
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -300,7 +300,7 @@ const Appeal = () => {
                   className="rounded-lg border border-border bg-card p-5"
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
-                    <p className="text-sm text-foreground/80">{appeal.explanation}</p>
+                    <p className="text-sm text-foreground/80">{appeal.appeal_text ?? "No reason provided."}</p>
                     <Badge
                       variant="outline"
                       className={`text-[10px] flex-shrink-0 ${
@@ -321,9 +321,9 @@ const Appeal = () => {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground/50 mb-2">{formatDate(appeal.created_at)}</p>
-                  {appeal.admin_response && (
+                  {appeal.resolution_text && (
                     <p className="text-xs text-muted-foreground/60 leading-relaxed italic">
-                      "{appeal.admin_response}"
+                      "{appeal.resolution_text}"
                     </p>
                   )}
                 </motion.div>

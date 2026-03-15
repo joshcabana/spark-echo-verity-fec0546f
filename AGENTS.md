@@ -3,7 +3,7 @@
 ## Project
 Speed-dating web app. React 18 + TypeScript + Vite frontend, Supabase backend (PostgreSQL, RLS, 19 Edge Functions in Deno), Agora RTC for video, Stripe for payments.
 Repo: joshcabana/spark-echo-verity-fec0546f
-Supabase project ID: itdzdyhdkbcxbqgukzis
+Supabase project ID: nhpbxlvogqnqutmflwlk
 
 ## Rules
 - Always run `npm run lint` before finishing any task. Fix all lint errors.

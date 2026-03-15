@@ -6,11 +6,11 @@ const REQUIRED_RUNTIME_KEYS = [
 export type RequiredRuntimeKey = (typeof REQUIRED_RUNTIME_KEYS)[number];
 
 // Platform-level fallback: if env vars aren't injected (config.toml mismatch),
-// use the known Lovable Cloud project credentials (publishable/anon only).
+// use the known production project credentials (publishable/anon only).
 const CLOUD_FALLBACKS: Record<RequiredRuntimeKey, string> = {
-  VITE_SUPABASE_URL: "https://itdzdyhdkbcxbqgukzis.supabase.co",
+  VITE_SUPABASE_URL: "https://nhpbxlvogqnqutmflwlk.supabase.co",
   VITE_SUPABASE_PUBLISHABLE_KEY:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml0ZHpkeWhka2JjeGJxZ3VremlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxMDA5MTcsImV4cCI6MjA4NzY3NjkxN30.06IYR1KfgqKb9kgiWJQYmEEti5Sts0HaBvEgTooSlho",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ocGJ4bHZvZ3FucXV0bWZsd2xrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MDQ4MzUsImV4cCI6MjA3OTM4MDgzNX0.BDZmwx15CSsjgHZYHodz8zSbE_pRCjXwiSoRf-UgwMc",
 };
 
 const readRuntimeValue = (key: RequiredRuntimeKey): string | undefined => {
