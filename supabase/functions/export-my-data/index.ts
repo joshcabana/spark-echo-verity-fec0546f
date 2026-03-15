@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       supabase.from("spark_reflections").select("*").eq("user_id", userId),
       supabase.from("chemistry_vault_items").select("*").eq("user_id", userId),
       supabase.from("reports").select("id, reason, created_at, status").eq("reporter_id", userId),
-      supabase.from("appeals").select("id, explanation, status, created_at").eq("user_id", userId),
+      supabase.from("appeals").select("id, appeal_text, status, created_at, resolution_text, moderation_event_id").eq("user_id", userId),
       supabase.from("token_transactions").select("*").eq("user_id", userId),
     ]);
 

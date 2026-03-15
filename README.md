@@ -196,7 +196,7 @@ npm run build
 
 ### Auth Provider Policy
 
-- Canonical Cloud project: `itdzdyhdkbcxbqgukzis`
+- Canonical Cloud project: `nhpbxlvogqnqutmflwlk`
 - Runtime policy source: `public.app_config` row `key='auth_policy'`
 - Phone verification mode: `value_json.require_phone_verification` (served via `get-feature-flags`)
 - Phase 4 feature toggles: `value_json.enable_replay_vault`, `enable_friendfluence`, `enable_voice_intro`, `enable_guardian_net`

@@ -86,7 +86,7 @@ const HeroSection = () => {
             className="group w-full sm:w-auto"
             onClick={() =>
               trackEvent(ANALYTICS_EVENTS.landingPrimaryCtaClicked, {
-                source: "hero",
+                cta_id: "hero",
                 featured_drop_id: featuredDrop?.id ?? null,
               })
             }

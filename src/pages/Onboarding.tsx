@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Progress } from "@/components/ui/progress";
@@ -7,11 +7,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import ExcitementStep from "@/components/onboarding/ExcitementStep";
 import MagicLinkStep from "@/components/onboarding/MagicLinkStep";
 import VerifyStep from "@/components/onboarding/VerifyStep";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 
 const TOTAL_STEPS = 3;
+const STEP_KEYS = ["excitement", "magic_link", "verify"] as const;
+
+const getStepKey = (stepIndex: number) => STEP_KEYS[stepIndex] ?? STEP_KEYS[0];
 
 const Onboarding = () => {
   const [step, setStep] = useState(0);
+  const stepEnteredAtRef = useRef(Date.now());
   const navigate = useNavigate();
   const { user, userTrust } = useAuth();
 
@@ -19,6 +24,14 @@ const Onboarding = () => {
   useEffect(() => {
     document.title = "Verity Onboarding • Real chemistry in 45 seconds";
   }, []);
+
+  useEffect(() => {
+    trackEvent(ANALYTICS_EVENTS.onboardingStepViewed, {
+      step_index: step,
+      step_key: getStepKey(step),
+    });
+    stepEnteredAtRef.current = Date.now();
+  }, [step]);
 
   // Resume / redirect if already complete
   useEffect(() => {
@@ -35,16 +48,29 @@ const Onboarding = () => {
 
   const saveStep = async (nextStep: number) => {
     if (!user) return;
-    await supabase.from("user_trust").upsert(
+    const { error } = await supabase.from("user_trust").upsert(
       { user_id: user.id, onboarding_step: nextStep },
       { onConflict: "user_id" }
     );
+
+    if (error) {
+      console.error("Failed to persist onboarding step", error);
+    }
+  };
+
+  const trackStepCompleted = (stepIndex: number) => {
+    trackEvent(ANALYTICS_EVENTS.onboardingStepCompleted, {
+      elapsed_ms: Math.max(0, Date.now() - stepEnteredAtRef.current),
+      step_index: stepIndex,
+      step_key: getStepKey(stepIndex),
+    });
   };
 
   const handleExcitementDone = () => {
+    trackStepCompleted(0);
     // If already signed in, skip magic link
     if (user) {
-      saveStep(2);
+      void saveStep(2);
       setStep(2);
     } else {
       setStep(1);
@@ -52,11 +78,13 @@ const Onboarding = () => {
   };
 
   const handleMagicLinkDone = () => {
-    saveStep(2);
+    trackStepCompleted(1);
+    void saveStep(2);
     setStep(2);
   };
 
   const handleVerifyDone = () => {
+    trackStepCompleted(2);
     navigate("/lobby", { replace: true });
   };
 

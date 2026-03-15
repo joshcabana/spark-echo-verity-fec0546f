@@ -62,9 +62,8 @@ serve(async (req) => {
       .from("appeals")
       .update({
         status: action === "approve" ? "upheld" : "denied",
-        admin_response: response || null,
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
+        resolution_text: response || null,
+        resolved_at: new Date().toISOString(),
       })
       .eq("id", appeal_id)
       .select()

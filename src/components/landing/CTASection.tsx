@@ -45,7 +45,7 @@ const CTASection = () => {
               className="group w-full sm:w-auto"
               onClick={() =>
                 trackEvent(ANALYTICS_EVENTS.landingPrimaryCtaClicked, {
-                  source: "footer_cta",
+                  cta_id: "footer_cta",
                   featured_drop_id: featuredDrop?.id ?? null,
                 })
               }

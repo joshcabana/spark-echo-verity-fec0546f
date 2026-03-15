@@ -34,9 +34,15 @@ serve(async (req) => {
     const body = await req.json();
 
     // Validate inputs
-    const explanation = typeof body.explanation === "string" ? body.explanation.trim() : "";
-    if (explanation.length < 10 || explanation.length > 2000) {
-      return new Response(JSON.stringify({ error: "Explanation must be 10-2000 characters" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const appealTextRaw =
+      typeof body.appeal_text === "string"
+        ? body.appeal_text
+        : typeof body.explanation === "string"
+          ? body.explanation
+          : "";
+    const appeal_text = appealTextRaw.trim();
+    if (appeal_text.length < 10 || appeal_text.length > 2000) {
+      return new Response(JSON.stringify({ error: "Appeal text must be 10-2000 characters" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const voice_note_url = body.voice_note_url ? String(body.voice_note_url).trim() : null;
@@ -44,18 +50,19 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invalid voice note URL" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const flag_id = body.flag_id ? String(body.flag_id).trim() : null;
-    if (flag_id && !uuidRegex.test(flag_id)) {
-      return new Response(JSON.stringify({ error: "Invalid flag_id" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const moderationEventIdRaw = body.moderation_event_id ?? body.flag_id;
+    const moderation_event_id = moderationEventIdRaw ? String(moderationEventIdRaw).trim() : "";
+    if (!uuidRegex.test(moderation_event_id)) {
+      return new Response(JSON.stringify({ error: "Invalid moderation_event_id" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const { data, error } = await supabase
       .from("appeals")
       .insert({
         user_id: user.id,
-        explanation,
+        appeal_text,
         voice_note_url,
-        flag_id,
+        moderation_event_id,
       })
       .select()
       .single();
