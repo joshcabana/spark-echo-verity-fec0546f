@@ -305,6 +305,83 @@ export type Database = {
           },
         ]
       }
+      drop_theme_prompts: {
+        Row: {
+          id: string
+          is_active: boolean
+          position: number
+          prompt_text: string
+          theme_id: string
+        }
+        Insert: {
+          id?: string
+          is_active?: boolean
+          position?: number
+          prompt_text: string
+          theme_id: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          position?: number
+          prompt_text?: string
+          theme_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "drop_theme_prompts_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "drop_themes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      drop_themes: {
+        Row: {
+          accent_color: string
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_seasonal: boolean
+          seasonal_end: string | null
+          seasonal_start: string | null
+          slug: string
+          title: string
+          vibe: string | null
+        }
+        Insert: {
+          accent_color?: string
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_seasonal?: boolean
+          seasonal_end?: string | null
+          seasonal_start?: string | null
+          slug: string
+          title: string
+          vibe?: string | null
+        }
+        Update: {
+          accent_color?: string
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_seasonal?: boolean
+          seasonal_end?: string | null
+          seasonal_start?: string | null
+          slug?: string
+          title?: string
+          vibe?: string | null
+        }
+        Relationships: []
+      }
       drops: {
         Row: {
           created_at: string
@@ -357,6 +434,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      experiment_assignments: {
+        Row: {
+          assigned_at: string
+          experiment_key: string
+          user_id: string
+          variant_key: string
+        }
+        Insert: {
+          assigned_at?: string
+          experiment_key: string
+          user_id: string
+          variant_key: string
+        }
+        Update: {
+          assigned_at?: string
+          experiment_key?: string
+          user_id?: string
+          variant_key?: string
+        }
+        Relationships: []
       }
       guardian_alerts: {
         Row: {
@@ -593,6 +691,69 @@ export type Database = {
           },
         ]
       }
+      notification_deliveries: {
+        Row: {
+          channel: string
+          dedupe_key: string | null
+          id: string
+          metadata: Json
+          sent_at: string
+          template_key: string
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          dedupe_key?: string | null
+          id?: string
+          metadata?: Json
+          sent_at?: string
+          template_key: string
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          dedupe_key?: string | null
+          id?: string
+          metadata?: Json
+          sent_at?: string
+          template_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_preferences: {
+        Row: {
+          email_enabled: boolean
+          push_enabled: boolean
+          quiet_hours: Json
+          sms_enabled: boolean
+          transactional_only: boolean
+          updated_at: string
+          user_id: string
+          weekly_cap: number
+        }
+        Insert: {
+          email_enabled?: boolean
+          push_enabled?: boolean
+          quiet_hours?: Json
+          sms_enabled?: boolean
+          transactional_only?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_cap?: number
+        }
+        Update: {
+          email_enabled?: boolean
+          push_enabled?: boolean
+          quiet_hours?: Json
+          sms_enabled?: boolean
+          transactional_only?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_cap?: number
+        }
+        Relationships: []
+      }
       platform_stats: {
         Row: {
           active_users: number | null
@@ -632,6 +793,33 @@ export type Database = {
           stat_date?: string
           total_calls?: number | null
           total_sparks?: number | null
+        }
+        Relationships: []
+      }
+      product_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          properties: Json
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          properties?: Json
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          properties?: Json
+          session_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -724,6 +912,71 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      referral_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          invite_code: string
+          invitee_user_id: string | null
+          inviter_user_id: string
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invite_code: string
+          invitee_user_id?: string | null
+          inviter_user_id: string
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invite_code?: string
+          invitee_user_id?: string | null
+          inviter_user_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      referral_rewards: {
+        Row: {
+          granted_at: string
+          id: string
+          referral_id: string
+          reward_type: string
+          reward_value: number
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          id?: string
+          referral_id: string
+          reward_type: string
+          reward_value?: number
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          id?: string
+          referral_id?: string
+          reward_type?: string
+          reward_value?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_rewards_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "referral_invites"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reports: {
         Row: {
@@ -956,6 +1209,72 @@ export type Database = {
         }
         Relationships: []
       }
+      success_stories: {
+        Row: {
+          anonymized_name: string
+          approved_by: string | null
+          author_user_id: string | null
+          city: string | null
+          created_at: string
+          id: string
+          is_approved: boolean
+          published_at: string | null
+          story_text: string
+          tags: string[]
+        }
+        Insert: {
+          anonymized_name: string
+          approved_by?: string | null
+          author_user_id?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          published_at?: string | null
+          story_text: string
+          tags?: string[]
+        }
+        Update: {
+          anonymized_name?: string
+          approved_by?: string | null
+          author_user_id?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          published_at?: string | null
+          story_text?: string
+          tags?: string[]
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          score: number | null
+          survey_key: string
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          score?: number | null
+          survey_key: string
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          score?: number | null
+          survey_key?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       token_transactions: {
         Row: {
           amount: number
@@ -1088,6 +1407,30 @@ export type Database = {
           selfie_verified?: boolean
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      verification_signals: {
+        Row: {
+          metadata: Json
+          signal_key: string
+          status: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          metadata?: Json
+          signal_key: string
+          status?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          metadata?: Json
+          signal_key?: string
+          status?: string
+          user_id?: string
+          verified_at?: string | null
         }
         Relationships: []
       }
