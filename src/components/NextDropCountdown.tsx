@@ -27,7 +27,7 @@ function formatCountdown(ms: number): string {
 const pulseVariants = {
   animate: {
     scale: [1, 1.04, 1],
-    transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" as const },
   },
 };
 
