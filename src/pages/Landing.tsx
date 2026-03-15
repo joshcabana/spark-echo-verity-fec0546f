@@ -9,6 +9,7 @@ import FeaturesSection from "@/components/landing/FeaturesSection";
 import TrustSection from "@/components/landing/TrustSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
+import NextDropCountdown from "@/components/NextDropCountdown";
 
 const Landing = () => {
   return (
@@ -30,6 +31,7 @@ const Landing = () => {
       <BetaBanner />
       <Navbar />
       <HeroSection />
+      <NextDropCountdown />
       <HowItWorksSection />
       <StatsSection />
       <PromoVideoSection />

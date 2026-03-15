@@ -1,11 +1,69 @@
-/* Verity Service Worker — Push Notifications */
+/* Verity Service Worker — App Shell Cache + Push Notifications */
 
+const CACHE_VERSION = "verity-v1";
+const STATIC_ASSETS = ["/", "/index.html", "/manifest.json"];
+
+// ---------- Install: pre-cache app shell ----------
 self.addEventListener("install", (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(STATIC_ASSETS))
+  );
 });
 
+// ---------- Activate: purge old caches ----------
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((k) => k !== CACHE_VERSION).map((k) => caches.delete(k))
+        )
+      )
+      .then(() => self.clients.claim())
+  );
+});
+
+// ---------- Fetch: cache-first for static, network-first for API ----------
+self.addEventListener("fetch", (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Network-first for API / Supabase calls
+  if (
+    url.pathname.startsWith("/rest/") ||
+    url.pathname.startsWith("/auth/") ||
+    url.pathname.startsWith("/functions/") ||
+    url.hostname.includes("supabase")
+  ) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) return response;
+          return caches.match(request).then((cached) => cached || response);
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Cache-first for same-origin static assets
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(request).then(
+        (cached) =>
+          cached ||
+          fetch(request).then((response) => {
+            if (response.ok) {
+              const clone = response.clone();
+              caches.open(CACHE_VERSION).then((cache) => cache.put(request, clone));
+            }
+            return response;
+          })
+      )
+    );
+  }
 });
 
 self.addEventListener("push", (event) => {
