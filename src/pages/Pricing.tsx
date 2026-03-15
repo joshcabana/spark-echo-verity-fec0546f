@@ -6,19 +6,19 @@ import { Button } from "@/components/ui/button";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-type Tier = {
+type PricingTier = {
   name: string;
   price: string;
-  oldPrice?: string;
   period: string;
   description: string;
   features: string[];
   cta: string;
   variant: "gold-outline" | "gold";
   highlighted?: boolean;
+  oldPrice?: string;
 };
 
-const tiers =: Tier[] [
+const tiers: PricingTier[] = [
   {
     name: "Free",
     price: "$0",
@@ -126,9 +126,9 @@ const Pricing = () => {
                   <span className="text-3xl font-serif text-foreground">
                     {tier.price}
                   </span>
-                                {tier.oldPrice && (
+                  {tier.oldPrice && (
                     <span className="text-sm text-muted-foreground/50 line-through">
-                                      {tier.oldPrice}
+                      {tier.oldPrice}
                     </span>
                   )}
                   <span className="text-sm text-muted-foreground">
