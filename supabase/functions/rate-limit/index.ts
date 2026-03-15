@@ -6,16 +6,43 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const RATE_LIMIT_POLICIES = {
+  default: {
+    maxRequests: 30,
+    windowSeconds: 60,
+  },
+} as const;
+
+type RateLimitScope = keyof typeof RATE_LIMIT_POLICIES;
+
 interface RateLimitRequest {
-  key: string;
-  max_requests: number;
-  window_seconds: number;
+  scope?: RateLimitScope;
 }
 
 interface RateLimitResponse {
   allowed: boolean;
   remaining: number;
   reset_at: string;
+}
+
+function jsonResponse(body: unknown, init: ResponseInit = {}) {
+  return new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+}
+
+function getRequestIdentity(req: Request): string | null {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  const clientIp = forwardedFor?.split(",")[0]?.trim()
+    ?? req.headers.get("cf-connecting-ip")
+    ?? req.headers.get("x-real-ip");
+
+  return clientIp ? `ip:${clientIp}` : null;
 }
 
 serve(async (req: Request) => {
@@ -25,23 +52,44 @@ serve(async (req: Request) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { key, max_requests, window_seconds }: RateLimitRequest = await req.json();
+    const payload = await req.json().catch(() => ({})) as RateLimitRequest;
+    const scope = payload.scope ?? "default";
 
-    if (!key || !max_requests || !window_seconds) {
-      return new Response(
-        JSON.stringify({ error: "key, max_requests, and window_seconds are required" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!(scope in RATE_LIMIT_POLICIES)) {
+      return jsonResponse({ error: "Unsupported rate limit scope" }, { status: 400 });
     }
 
-    // Delegate to the atomic SQL RPC to avoid race conditions
+    const authHeader = req.headers.get("Authorization");
+    let identity = getRequestIdentity(req);
+
+    if (authHeader?.startsWith("Bearer ")) {
+      const userClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+
+      const {
+        data: { user },
+      } = await userClient.auth.getUser();
+
+      if (user) {
+        identity = `user:${user.id}`;
+      }
+    }
+
+    if (!identity) {
+      return jsonResponse({ error: "Unable to determine request identity" }, { status: 400 });
+    }
+
+    const { maxRequests, windowSeconds } = RATE_LIMIT_POLICIES[scope];
+
     const { data, error } = await supabase.rpc("check_rate_limit", {
-      p_key: key,
-      p_max_requests: max_requests,
-      p_window_seconds: window_seconds,
+      p_key: `${scope}:${identity}`,
+      p_max_requests: maxRequests,
+      p_window_seconds: windowSeconds,
     });
 
     if (error) {
@@ -50,20 +98,15 @@ serve(async (req: Request) => {
 
     const { allowed, remaining, reset_at } = data as RateLimitResponse;
 
-    return new Response(JSON.stringify({ allowed, remaining, reset_at }), {
+    return jsonResponse({ allowed, remaining, reset_at, scope }, {
       status: allowed ? 200 : 429,
       headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-        "X-RateLimit-Limit": String(max_requests),
+        "X-RateLimit-Limit": String(maxRequests),
         "X-RateLimit-Remaining": String(remaining),
         "X-RateLimit-Reset": reset_at,
       },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: String(error) }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: String(error) }, { status: 500 });
   }
 });

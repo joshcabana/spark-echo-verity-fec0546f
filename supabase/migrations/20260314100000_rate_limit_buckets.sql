@@ -33,6 +33,7 @@ CREATE OR REPLACE FUNCTION check_rate_limit(
 RETURNS JSON
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_now           TIMESTAMPTZ := NOW();
@@ -46,27 +47,27 @@ BEGIN
   v_window_start := v_now - (p_window_seconds || ' seconds')::INTERVAL;
 
   -- Purge expired buckets
-  DELETE FROM rate_limit_buckets
+  DELETE FROM public.rate_limit_buckets
   WHERE key = p_key AND window_start < v_window_start;
 
   -- Atomically insert or increment the counter for the current second bucket
   v_bucket_start := date_trunc('second', v_now);
 
-  INSERT INTO rate_limit_buckets (key, count, window_start)
+  INSERT INTO public.rate_limit_buckets (key, count, window_start)
   VALUES (p_key, 1, v_bucket_start)
   ON CONFLICT (key, window_start)
-  DO UPDATE SET count = rate_limit_buckets.count + 1;
+  DO UPDATE SET count = public.rate_limit_buckets.count + 1;
 
   -- Sum all counts within the sliding window
   SELECT COALESCE(SUM(count), 0)
   INTO v_count
-  FROM rate_limit_buckets
+  FROM public.rate_limit_buckets
   WHERE key = p_key AND window_start >= v_window_start;
 
   -- reset_at is when the oldest active bucket expires
   SELECT window_start + (p_window_seconds || ' seconds')::INTERVAL
   INTO v_reset_at
-  FROM rate_limit_buckets
+  FROM public.rate_limit_buckets
   WHERE key = p_key AND window_start >= v_window_start
   ORDER BY window_start ASC
   LIMIT 1;
@@ -82,3 +83,6 @@ BEGIN
   );
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.check_rate_limit(TEXT, INT, INT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.check_rate_limit(TEXT, INT, INT) TO service_role;
