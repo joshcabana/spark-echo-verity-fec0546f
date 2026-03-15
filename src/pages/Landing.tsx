@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import BetaBanner from "@/components/landing/BetaBanner";
 import Navbar from "@/components/landing/Navbar";
@@ -10,8 +11,19 @@ import TrustSection from "@/components/landing/TrustSection";
 import CTASection from "@/components/landing/CTASection";
 import Footer from "@/components/landing/Footer";
 import NextDropCountdown from "@/components/NextDropCountdown";
+import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 
 const Landing = () => {
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    trackEvent(ANALYTICS_EVENTS.landingViewed, {
+      utm_campaign: params.get("utm_campaign") ?? undefined,
+      utm_medium: params.get("utm_medium") ?? undefined,
+      utm_source: params.get("utm_source") ?? undefined,
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>

@@ -394,6 +394,7 @@ export type Database = {
           room_id: string
           scheduled_at: string
           status: string
+          theme_id: string | null
           timezone: string
           title: string
         }
@@ -408,6 +409,7 @@ export type Database = {
           room_id: string
           scheduled_at: string
           status?: string
+          theme_id?: string | null
           timezone?: string
           title: string
         }
@@ -422,6 +424,7 @@ export type Database = {
           room_id?: string
           scheduled_at?: string
           status?: string
+          theme_id?: string | null
           timezone?: string
           title?: string
         }
@@ -431,6 +434,13 @@ export type Database = {
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "drops_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "drop_themes"
             referencedColumns: ["id"]
           },
         ]
@@ -691,6 +701,126 @@ export type Database = {
           },
         ]
       }
+      platform_stats: {
+        Row: {
+          active_users: number | null
+          ai_accuracy: number | null
+          appeals_total: number | null
+          appeals_upheld: number | null
+          created_at: string
+          gender_balance: Json | null
+          id: string
+          moderation_flags_count: number | null
+          stat_date: string
+          total_calls: number | null
+          total_sparks: number | null
+        }
+        Insert: {
+          active_users?: number | null
+          ai_accuracy?: number | null
+          appeals_total?: number | null
+          appeals_upheld?: number | null
+          created_at?: string
+          gender_balance?: Json | null
+          id?: string
+          moderation_flags_count?: number | null
+          stat_date?: string
+          total_calls?: number | null
+          total_sparks?: number | null
+        }
+        Update: {
+          active_users?: number | null
+          ai_accuracy?: number | null
+          appeals_total?: number | null
+          appeals_upheld?: number | null
+          created_at?: string
+          gender_balance?: Json | null
+          id?: string
+          moderation_flags_count?: number | null
+          stat_date?: string
+          total_calls?: number | null
+          total_sparks?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          created_at: string
+          display_name: string | null
+          first_call_at: string | null
+          first_lobby_seen_at: string | null
+          first_mutual_spark_at: string | null
+          first_rsvp_at: string | null
+          gender: string | null
+          handle: string | null
+          id: string
+          is_active: boolean | null
+          onboarding_variant: string | null
+          subscription_expires_at: string | null
+          subscription_tier:
+            | Database["public"]["Enums"]["subscription_tier"]
+            | null
+          token_balance: number
+          updated_at: string
+          user_id: string
+          verification_status: string | null
+        }
+        Insert: {
+          age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string | null
+          first_call_at?: string | null
+          first_lobby_seen_at?: string | null
+          first_mutual_spark_at?: string | null
+          first_rsvp_at?: string | null
+          gender?: string | null
+          handle?: string | null
+          id?: string
+          is_active?: boolean | null
+          onboarding_variant?: string | null
+          subscription_expires_at?: string | null
+          subscription_tier?:
+            | Database["public"]["Enums"]["subscription_tier"]
+            | null
+          token_balance?: number
+          updated_at?: string
+          user_id: string
+          verification_status?: string | null
+        }
+        Update: {
+          age?: number | null
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          created_at?: string
+          display_name?: string | null
+          first_call_at?: string | null
+          first_lobby_seen_at?: string | null
+          first_mutual_spark_at?: string | null
+          first_rsvp_at?: string | null
+          gender?: string | null
+          handle?: string | null
+          id?: string
+          is_active?: boolean | null
+          onboarding_variant?: string | null
+          subscription_expires_at?: string | null
+          subscription_tier?:
+            | Database["public"]["Enums"]["subscription_tier"]
+            | null
+          token_balance?: number
+          updated_at?: string
+          user_id?: string
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
       notification_deliveries: {
         Row: {
           channel: string
@@ -754,47 +884,50 @@ export type Database = {
         }
         Relationships: []
       }
-      platform_stats: {
+      post_call_feedback: {
         Row: {
-          active_users: number | null
-          ai_accuracy: number | null
-          appeals_total: number | null
-          appeals_upheld: number | null
+          call_id: string
           created_at: string
-          gender_balance: Json | null
+          free_text: string | null
           id: string
-          moderation_flags_count: number | null
-          stat_date: string
-          total_calls: number | null
-          total_sparks: number | null
+          rating: number | null
+          reason_codes: string[]
+          user_id: string
         }
         Insert: {
-          active_users?: number | null
-          ai_accuracy?: number | null
-          appeals_total?: number | null
-          appeals_upheld?: number | null
+          call_id: string
           created_at?: string
-          gender_balance?: Json | null
+          free_text?: string | null
           id?: string
-          moderation_flags_count?: number | null
-          stat_date?: string
-          total_calls?: number | null
-          total_sparks?: number | null
+          rating?: number | null
+          reason_codes?: string[]
+          user_id: string
         }
         Update: {
-          active_users?: number | null
-          ai_accuracy?: number | null
-          appeals_total?: number | null
-          appeals_upheld?: number | null
+          call_id?: string
           created_at?: string
-          gender_balance?: Json | null
+          free_text?: string | null
           id?: string
-          moderation_flags_count?: number | null
-          stat_date?: string
-          total_calls?: number | null
-          total_sparks?: number | null
+          rating?: number | null
+          reason_codes?: string[]
+          user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "post_call_feedback_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_call_feedback_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "my_calls"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_events: {
         Row: {
@@ -820,69 +953,6 @@ export type Database = {
           properties?: Json
           session_id?: string | null
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          age: number | null
-          avatar_url: string | null
-          bio: string | null
-          city: string | null
-          created_at: string
-          display_name: string | null
-          gender: string | null
-          handle: string | null
-          id: string
-          is_active: boolean | null
-          subscription_expires_at: string | null
-          subscription_tier:
-            | Database["public"]["Enums"]["subscription_tier"]
-            | null
-          token_balance: number
-          updated_at: string
-          user_id: string
-          verification_status: string | null
-        }
-        Insert: {
-          age?: number | null
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          created_at?: string
-          display_name?: string | null
-          gender?: string | null
-          handle?: string | null
-          id?: string
-          is_active?: boolean | null
-          subscription_expires_at?: string | null
-          subscription_tier?:
-            | Database["public"]["Enums"]["subscription_tier"]
-            | null
-          token_balance?: number
-          updated_at?: string
-          user_id: string
-          verification_status?: string | null
-        }
-        Update: {
-          age?: number | null
-          avatar_url?: string | null
-          bio?: string | null
-          city?: string | null
-          created_at?: string
-          display_name?: string | null
-          gender?: string | null
-          handle?: string | null
-          id?: string
-          is_active?: boolean | null
-          subscription_expires_at?: string | null
-          subscription_tier?:
-            | Database["public"]["Enums"]["subscription_tier"]
-            | null
-          token_balance?: number
-          updated_at?: string
-          user_id?: string
-          verification_status?: string | null
         }
         Relationships: []
       }
@@ -1209,72 +1279,6 @@ export type Database = {
         }
         Relationships: []
       }
-      success_stories: {
-        Row: {
-          anonymized_name: string
-          approved_by: string | null
-          author_user_id: string | null
-          city: string | null
-          created_at: string
-          id: string
-          is_approved: boolean
-          published_at: string | null
-          story_text: string
-          tags: string[]
-        }
-        Insert: {
-          anonymized_name: string
-          approved_by?: string | null
-          author_user_id?: string | null
-          city?: string | null
-          created_at?: string
-          id?: string
-          is_approved?: boolean
-          published_at?: string | null
-          story_text: string
-          tags?: string[]
-        }
-        Update: {
-          anonymized_name?: string
-          approved_by?: string | null
-          author_user_id?: string | null
-          city?: string | null
-          created_at?: string
-          id?: string
-          is_approved?: boolean
-          published_at?: string | null
-          story_text?: string
-          tags?: string[]
-        }
-        Relationships: []
-      }
-      survey_responses: {
-        Row: {
-          answers: Json
-          created_at: string
-          id: string
-          score: number | null
-          survey_key: string
-          user_id: string | null
-        }
-        Insert: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          score?: number | null
-          survey_key: string
-          user_id?: string | null
-        }
-        Update: {
-          answers?: Json
-          created_at?: string
-          id?: string
-          score?: number | null
-          survey_key?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       token_transactions: {
         Row: {
           amount: number
@@ -1407,30 +1411,6 @@ export type Database = {
           selfie_verified?: boolean
           updated_at?: string
           user_id?: string
-        }
-        Relationships: []
-      }
-      verification_signals: {
-        Row: {
-          metadata: Json
-          signal_key: string
-          status: string
-          user_id: string
-          verified_at: string | null
-        }
-        Insert: {
-          metadata?: Json
-          signal_key: string
-          status?: string
-          user_id: string
-          verified_at?: string | null
-        }
-        Update: {
-          metadata?: Json
-          signal_key?: string
-          status?: string
-          user_id?: string
-          verified_at?: string | null
         }
         Relationships: []
       }
@@ -1630,6 +1610,96 @@ export type Database = {
         }
         Relationships: []
       }
+      success_stories: {
+        Row: {
+          anonymized_name: string
+          author_user_id: string | null
+          approved_by: string | null
+          city: string | null
+          created_at: string
+          id: string
+          is_approved: boolean
+          published_at: string | null
+          story_text: string
+          tags: string[]
+        }
+        Insert: {
+          anonymized_name: string
+          author_user_id?: string | null
+          approved_by?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          published_at?: string | null
+          story_text: string
+          tags?: string[]
+        }
+        Update: {
+          anonymized_name?: string
+          author_user_id?: string | null
+          approved_by?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean
+          published_at?: string | null
+          story_text?: string
+          tags?: string[]
+        }
+        Relationships: []
+      }
+      survey_responses: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          score: number | null
+          survey_key: string
+          user_id: string | null
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          score?: number | null
+          survey_key: string
+          user_id?: string | null
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          score?: number | null
+          survey_key?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      verification_signals: {
+        Row: {
+          metadata: Json
+          signal_key: string
+          status: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          metadata?: Json
+          signal_key: string
+          status?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          metadata?: Json
+          signal_key?: string
+          status?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
@@ -1653,7 +1723,10 @@ export type Database = {
       }
     }
     Functions: {
-      check_notification_cap: { Args: { p_user_id: string }; Returns: boolean }
+      check_notification_cap: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       claim_match_candidate: {
         Args: { p_drop_id: string; p_user_id: string }
         Returns: {
