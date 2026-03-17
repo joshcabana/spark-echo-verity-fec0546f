@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           "vendor-agora": ["agora-rtc-sdk-ng"],
+          "vendor-ui": ["class-variance-authority", "clsx", "tailwind-merge"],
           "vendor-motion": ["framer-motion"],
           "vendor-charts": ["recharts"],
           "vendor-router": ["react-router-dom"],
