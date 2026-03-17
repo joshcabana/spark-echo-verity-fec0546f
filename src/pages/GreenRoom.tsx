@@ -7,10 +7,12 @@ import { Progress } from "@/components/ui/progress";
 import BottomNav from "@/components/BottomNav";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { getSupabaseRuntimeConfig } from "@/lib/runtimeEnv";
 
 type CheckStatus = "pending" | "ok" | "warn" | "error";
 
 const GreenRoom = () => {
+  const { supabaseUrl, supabasePublishableKey } = getSupabaseRuntimeConfig();
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -77,9 +79,9 @@ const GreenRoom = () => {
     (async () => {
       try {
         const start = performance.now();
-        await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/`, {
+        await fetch(`${supabaseUrl}/rest/v1/`, {
           method: "HEAD",
-          headers: { apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          headers: { apikey: supabasePublishableKey },
         });
         const latency = Math.round(performance.now() - start);
         if (cancelled) return;
@@ -90,7 +92,7 @@ const GreenRoom = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [supabasePublishableKey, supabaseUrl]);
 
   const statusColor = (s: CheckStatus) => {
     if (s === "ok") return "text-green-500";
