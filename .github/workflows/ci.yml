@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Canonical defaults for static CI gates (build/lint/test/typecheck/alignment).
-      VITE_SUPABASE_PROJECT_ID: itdzdyhdkbcxbqgukzis
-      VITE_SUPABASE_URL: https://itdzdyhdkbcxbqgukzis.supabase.co
+      VITE_SUPABASE_PROJECT_ID: nhpbxlvogqnqutmflwlk
+      VITE_SUPABASE_URL: https://nhpbxlvogqnqutmflwlk.supabase.co
       VITE_SUPABASE_PUBLISHABLE_KEY: ci_placeholder_anon_key
       VITE_REQUIRE_PHONE_VERIFICATION: "false"
       VITE_REQUIRE_GOOGLE_AUTH: "false"
@@ -30,6 +30,9 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Runtime environment contract
+        run: npm run check:runtime-env
+
       - name: Project alignment
         run: npm run check:project-alignment
 
@@ -43,10 +46,19 @@ jobs:
         run: npm run lint
 
       - name: Test
-        run: npm run test -- --run
+        run: npm run test
 
       - name: Build
         run: npm run build
 
       - name: Typecheck
-        run: npx tsc -b
+        run: npm run typecheck
+
+      - name: Bundle boundaries
+        run: npm run check:bundle-boundaries
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke suite
+        run: npm run test:smoke

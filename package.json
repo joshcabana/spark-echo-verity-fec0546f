@@ -12,11 +12,14 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:smoke": "node ./scripts/run-smoke-suite.mjs",
     "test:edge-integration": "deno test --allow-env --allow-net supabase/functions/spark-extend/spark-extend.integration.ts",
     "typecheck": "tsc -b",
-    "check:project-alignment": "echo 'Project alignment check passed'",
-    "check:no-hardcoded-supabase": "! grep -r 'eyJ' src/ --include='*.ts' --include='*.tsx' || echo 'No hardcoded Supabase credentials found'",
-    "check:auth-settings": "echo 'Auth settings check passed'"
+    "check:runtime-env": "node ./scripts/check-required-runtime-env.mjs",
+    "check:project-alignment": "node ./scripts/check-project-alignment.mjs",
+    "check:no-hardcoded-supabase": "node ./scripts/check-no-hardcoded-supabase.mjs",
+    "check:auth-settings": "node ./scripts/check-auth-settings.mjs",
+    "check:bundle-boundaries": "node ./scripts/check-bundle-boundaries.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",
@@ -97,6 +100,7 @@
     "jsdom": "^29.0.0",
     "lovable-tagger": "^1.1.13",
     "postcss": "^8.5.6",
+    "playwright": "^1.55.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
