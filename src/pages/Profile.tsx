@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Camera, Check, LogOut, Crown, Shield, Phone, ScanFace, Coins, Pencil, X, Loader2 } from "lucide-react";
+import { Camera, Check, LogOut, Crown, Shield, Phone, Coins, Pencil, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -100,7 +100,7 @@ const Profile = () => {
 
   const verifications = [
     { label: "Phone", done: !!userTrust?.phone_verified, icon: Phone },
-    { label: "Selfie", done: !!userTrust?.selfie_verified, icon: ScanFace },
+    
     { label: "Safety Pledge", done: !!userTrust?.safety_pledge_accepted, icon: Shield },
   ];
 

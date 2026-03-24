@@ -22,9 +22,9 @@ const features = [
   },
   {
     icon: Shield,
-    title: "Guardian Net",
+    title: "Guardian Net (Coming Soon)",
     description:
-      "One tap to share a safe-call signal with a trusted friend. They see only 'in Verity call until 9:12 pm' — nothing else.",
+      "A one-tap safety signal to trusted contacts. In development.",
   },
   {
     icon: MessageCircle,
