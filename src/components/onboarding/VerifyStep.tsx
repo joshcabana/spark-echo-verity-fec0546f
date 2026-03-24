@@ -108,7 +108,7 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
     await supabase.from("user_trust").upsert({
       user_id: user.id,
       safety_pledge_accepted: true,
-      selfie_verified: true,
+      
       onboarding_step: 3,
       onboarding_complete: true,
     }, { onConflict: "user_id" });

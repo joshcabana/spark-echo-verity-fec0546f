@@ -8,7 +8,7 @@ import { usePublicDrops } from "@/hooks/usePublicDrops";
 import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 import { getFeaturedDrop } from "@/lib/dropSchedule";
 
-const trustChips = ["18+ verified", "45-second calls", "Raw video never stored"];
+const trustChips = ["18+ only", "45-second calls", "Anonymous video"];
 
 const HeroSection = () => {
   const { data: drops = [], error, isLoading } = usePublicDrops();

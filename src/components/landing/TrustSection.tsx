@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
 const points = [
-  { icon: Eye, text: "No recordings — video and audio are live-only, never stored" },
+  { icon: Eye, text: "Live video only — no video or audio files are saved to our servers" },
   { icon: Shield, text: "Mutual consent reveal — identity hidden unless both Spark" },
   { icon: UserCheck, text: "18+ verification required before joining any Drop" },
   { icon: LogOut, text: "One-tap exit and report — always accessible, zero friction" },
