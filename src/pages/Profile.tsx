@@ -100,7 +100,7 @@ const Profile = () => {
 
   const verifications = [
     { label: "Phone", done: !!userTrust?.phone_verified, icon: Phone },
-    { label: "Selfie", done: !!userTrust?.selfie_verified, icon: ScanFace },
+    
     { label: "Safety Pledge", done: !!userTrust?.safety_pledge_accepted, icon: Shield },
   ];
 
