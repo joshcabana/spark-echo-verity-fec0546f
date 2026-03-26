@@ -2,19 +2,20 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { resolveSafeReturnUrl } from "../_shared/url-validation.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://getverity.com.au",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const ALLOWED_ORIGINS = [
   "https://getverity.com.au",
+  "https://www.getverity.com.au",
+  "https://app.getverity.com.au",
+  "https://verity-app-plum.vercel.app",
   "https://spark-echo-verity.lovable.app",
   "https://id-preview--a81e90ba-a208-41e2-bf07-a3adfb94bfcb.lovable.app",
 ];
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
