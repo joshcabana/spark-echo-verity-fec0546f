@@ -1,10 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { ArrowRight, Shield, Eye, UserCheck, Sparkles } from "lucide-react";
-import { useAgoraCall } from "@/hooks/useAgoraCall";
-import { supabase } from "@/integrations/supabase/client";
 import SparkPassButtons from "@/components/call/SparkPassButtons";
 
 interface ExcitementStepProps {
@@ -20,52 +18,27 @@ const TRUST_BULLETS = [
 const FULL_DURATION = 45;
 const TEST_DURATION = 5;
 
-interface AgoraTokenResponse {
-  token: string;
-  appId: string;
-  uid: number;
-  channel: string;
-}
-
 const ExcitementStep = ({ onNext }: ExcitementStepProps) => {
   const [testMode, setTestMode] = useState(false);
   const demoDuration = testMode ? TEST_DURATION : FULL_DURATION;
 
-  // Demo state machine: idle → loading → agora | simulated → choice → reveal → done
-  const [phase, setPhase] = useState<"idle" | "loading" | "agora" | "simulated" | "choice" | "reveal">("idle");
+  const [phase, setPhase] = useState<"idle" | "loading" | "simulated" | "choice" | "reveal">("idle");
   const [countdown, setCountdown] = useState(demoDuration);
   const [demoComplete, setDemoComplete] = useState(false);
 
-  // Agora credentials
-  const [agoraConfig, setAgoraConfig] = useState<AgoraTokenResponse | null>(null);
-  const agoraEnabled = phase === "agora" && !!agoraConfig;
-
-  const {
-    localVideoRef,
-    isJoined,
-    error: agoraError,
-    leave,
-  } = useAgoraCall({
-    appId: agoraConfig?.appId ?? "",
-    channel: agoraConfig?.channel ?? "",
-    token: agoraConfig?.token ?? null,
-    uid: agoraConfig?.uid ?? 0,
-    enabled: agoraEnabled,
-  });
-
-  // If agora errors after joining, fall back to simulated
   useEffect(() => {
-    if (agoraError && phase === "agora") {
-      console.warn("Agora error, falling back to simulated demo:", agoraError);
-      leave();
-      setPhase("simulated");
+    if (phase !== "loading") return;
+
+    const timeoutId = window.setTimeout(() => {
       setCountdown(demoDuration);
-    }
-  }, [agoraError, phase, leave, demoDuration]);
+      setPhase("simulated");
+    }, 600);
 
-  // Countdown timer for both agora and simulated phases
+    return () => window.clearTimeout(timeoutId);
+  }, [demoDuration, phase]);
+
   useEffect(() => {
-    if (phase !== "agora" && phase !== "simulated") return;
+    if (phase !== "simulated") return;
     if (countdown <= 0) return;
 
     const t = setInterval(() => {
@@ -80,44 +53,24 @@ const ExcitementStep = ({ onNext }: ExcitementStepProps) => {
     return () => clearInterval(t);
   }, [phase, countdown]);
 
-  // When countdown hits 0, transition to choice
   useEffect(() => {
-    if (countdown === 0 && (phase === "agora" || phase === "simulated")) {
+    if (countdown === 0 && phase === "simulated") {
       console.log("DEMO_ENDED");
-      if (phase === "agora") leave();
       setPhase("choice");
     }
-  }, [countdown, phase, leave]);
+  }, [countdown, phase]);
 
-  const startDemo = useCallback(async () => {
-    console.log("AGORA_DEMO_START");
+  const startDemo = useCallback(() => {
+    console.log("ONBOARDING_DEMO_START");
     setPhase("loading");
     setCountdown(demoDuration);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("agora-demo-token", {
-        method: "POST",
-      });
-
-      if (error || !data?.token) {
-        throw new Error(error?.message ?? "No token returned");
-      }
-
-      console.log("AGORA_TOKEN_GENERATED");
-      setAgoraConfig(data as AgoraTokenResponse);
-      setPhase("agora");
-    } catch (err) {
-      console.warn("Token fetch failed, using simulated demo:", err);
-      setPhase("simulated");
-    }
   }, [demoDuration]);
 
   const skipDemo = useCallback(() => {
     console.log("DEMO_ENDED");
-    if (phase === "agora") leave();
     setPhase("choice");
     setCountdown(0);
-  }, [phase, leave]);
+  }, []);
 
   const handleChoice = useCallback((choice: "spark" | "pass") => {
     console.log(choice === "spark" ? "SPARK_SELECTED" : "PASS_SELECTED");
@@ -128,7 +81,7 @@ const ExcitementStep = ({ onNext }: ExcitementStepProps) => {
     }, 2000);
   }, []);
 
-  const isOverlayActive = phase === "loading" || phase === "agora" || phase === "simulated" || phase === "choice" || phase === "reveal";
+  const isOverlayActive = phase === "loading" || phase === "simulated" || phase === "choice" || phase === "reveal";
 
   return (
     <motion.div
@@ -204,30 +157,6 @@ const ExcitementStep = ({ onNext }: ExcitementStepProps) => {
               </motion.div>
             )}
 
-            {/* Agora live video */}
-            {phase === "agora" && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center w-full max-w-sm">
-                <p className="text-xs tracking-luxury uppercase text-primary/80 mb-3">Live camera preview</p>
-                <p className="font-serif text-2xl text-foreground mb-4">Anonymous until mutual spark</p>
-
-                {/* Local video container */}
-                <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-border/40 bg-secondary/20 mb-6">
-                  <div ref={localVideoRef} className="absolute inset-0" />
-                  {!isJoined && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                    </div>
-                  )}
-                </div>
-
-                <CountdownRing countdown={countdown} total={demoDuration} />
-
-                <Button variant="ghost" size="sm" onClick={skipDemo} className="mt-4 text-muted-foreground">
-                  Skip demo
-                </Button>
-              </motion.div>
-            )}
-
             {/* Simulated fallback */}
             {phase === "simulated" && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center">
@@ -247,7 +176,7 @@ const ExcitementStep = ({ onNext }: ExcitementStepProps) => {
                 <CountdownRing countdown={countdown} total={demoDuration} />
 
                 <p className="text-sm text-muted-foreground max-w-xs mt-6 mb-6">
-                  In a real Drop, you'd see your match's silhouette — voice only for the first 10 seconds, then video reveals.
+                  In a real Drop, you'd hear your match first, then the live anonymised video call would reveal just enough to feel the chemistry.
                 </p>
 
                 <Button variant="ghost" size="sm" onClick={skipDemo} className="text-muted-foreground">
