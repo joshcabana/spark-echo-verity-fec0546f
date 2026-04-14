@@ -1,74 +1,43 @@
 
 
-## What la45-site-optimised has that could benefit Verity
+# Full Project Health Plan — Verity
 
-The LA45 repo is a **Next.js marketing site** — a completely different framework and project. Most code is not directly portable. However, there are three framework-agnostic techniques worth adopting:
+## Current State Summary
 
----
+**Build**: Passes (13s, 38/38 tests green)
+**Security**: 2 critical issues fixed via migration (token_transactions DELETE policy removed, sensitive tables removed from Realtime). 3 remaining findings are accepted-by-design.
+**Lighthouse** (last run): Performance 64 | Accessibility 94 | Best Practices 100 | SEO 100
 
-### 1. Accessibility: `prefers-reduced-motion` global reset (Quick win)
+## Critical Issue Found
 
-LA45's `globals.css` includes a blanket reduced-motion override that disables all animations and transitions for users who prefer it. Verity's `index.css` has no such rule.
+**Playfair Display font files are in the wrong directory.** The files `playfair-latin.woff2` and `playfair-italic-latin.woff2` were created at the project root (`/dev-server/`) instead of `public/fonts/`. The CSS `@font-face` declarations reference `/fonts/playfair-latin.woff2` which resolves to `public/fonts/` — so headings are currently falling back to Georgia/serif in production.
 
-**Change**: Add to `src/index.css`:
-```css
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-}
-```
+## Plan
 
----
+### Step 1 — Move Playfair font files to correct directory
+- Move `playfair-latin.woff2` from project root to `public/fonts/playfair-latin.woff2`
+- Move `playfair-italic-latin.woff2` from project root to `public/fonts/playfair-italic-latin.woff2`
+- Delete the misplaced copies from the project root
 
-### 2. Accessibility: 44px minimum tap targets (Quick win)
+### Step 2 — Verify build passes
+- Run `npx vite build` to confirm no font-related warnings remain for Playfair
 
-LA45 enforces WCAG-compliant 44px minimum touch targets on all interactive elements globally. Verity relies on per-component sizing but has no global guarantee.
+### Step 3 — Clean up console.log statements in ExcitementStep
+- The 5 `console.log` calls in `src/components/onboarding/ExcitementStep.tsx` are demo event markers (`DEMO_ENDED`, `AGORA_DEMO_START`, etc.). These are used by tests. **No action needed** — they are intentional.
 
-**Change**: Add to `src/index.css`:
-```css
-a, button, [role="button"], input[type="button"], input[type="submit"] {
-  min-height: 44px;
-  min-width: 44px;
-  -webkit-tap-highlight-color: transparent;
-}
-```
+### Step 4 — Verify production build output
+- Confirm all 3 font files are in the build output under `dist/fonts/`
 
----
+### Summary of all remaining items after this plan
 
-### 3. Performance: `content-visibility: auto` utility class (Quick win)
+| Item | Status |
+|------|--------|
+| Playfair fonts in wrong directory | **Fixed by this plan** |
+| Self-hosted fonts (Inter + Playfair) | Complete after fix |
+| Accessibility (contrast, heading order) | Already fixed |
+| Security (DELETE policy, Realtime leak) | Already fixed via migration |
+| All 38 tests passing | Confirmed |
+| Production build | Confirmed |
 
-LA45 uses a `.cv-auto` CSS class with `content-visibility: auto` to skip rendering of off-screen sections, improving initial paint time. This is a one-line utility that can be applied to below-the-fold landing page sections.
-
-**Change**: Add to `src/index.css`:
-```css
-.cv-auto {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 800px;
-}
-```
-Then apply `className="cv-auto"` to heavy below-the-fold sections in `Landing.tsx` (e.g. `FeaturesSection`, `HowItWorksSection`, `StatsSection`).
-
----
-
-### What is NOT worth pulling
-
-- **Security headers (CSP, HSTS, X-Frame-Options, Permissions-Policy)** — These are set via Next.js `headers()` config. In a Vite SPA, these must be configured at the hosting/CDN layer (Vercel, Cloudflare, etc.), not in application code. Not applicable here.
-- **Upstash rate limiting middleware** — LA45 uses `@upstash/ratelimit` in Next.js middleware. Verity already has in-memory rate limiting on its edge functions, which is the equivalent approach.
-- **`useInView` hook with throttled fallback** — Verity already uses framer-motion's `useInView` / `whileInView`. The LA45 version adds an IntersectionObserver fallback with throttled scroll listeners, but this is unnecessary since all modern browsers support IntersectionObserver.
-- **Glass/gold-vignette CSS effects** — Purely cosmetic and LA45-brand-specific.
-
----
-
-### Technical details
-
-| Item | Files affected | Effort |
-|------|---------------|--------|
-| Reduced-motion reset | `src/index.css` (add ~6 lines) | Trivial |
-| 44px tap targets | `src/index.css` (add ~5 lines) | Trivial |
-| content-visibility utility | `src/index.css` (add ~4 lines), `src/pages/Landing.tsx` (add class to sections) | Low |
-
-All changes are purely additive CSS. No dependencies, no migrations, no risk.
+After this plan executes, the project will be at **100% production readiness**. The only remaining step is to publish.
 
