@@ -30,10 +30,10 @@ const Landing = () => {
       <BetaBanner />
       <Navbar />
       <HeroSection />
-      <HowItWorksSection />
-      <StatsSection />
-      <PromoVideoSection />
-      <FeaturesSection />
+      <div className="cv-auto"><HowItWorksSection /></div>
+      <div className="cv-auto"><StatsSection /></div>
+      <div className="cv-auto"><PromoVideoSection /></div>
+      <div className="cv-auto"><FeaturesSection /></div>
       <TrustSection />
       <CTASection />
       <Footer />

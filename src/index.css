@@ -189,7 +189,33 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer base {
+  a, button, [role="button"], input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
+  }
+}
+
 @keyframes sparkEntry {
+  0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
   0% { transform: scale(0) rotate(-90deg); opacity: 0; }
   100% { transform: scale(1) rotate(0deg); opacity: 1; }
 }
