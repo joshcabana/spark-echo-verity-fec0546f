@@ -1,18 +1,9 @@
 import { createRoot } from "react-dom/client";
-import * as Sentry from "@sentry/react";
 import App from "./App";
 import "./index.css";
 import { initSentry } from "@/lib/sentry";
 
 initSentry();
-
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    tracesSampleRate: 0.2,
-    replaysOnErrorSampleRate: 1.0,
-  });
-}
 
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
   window.addEventListener("load", () => {
@@ -23,8 +14,4 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 }
 
 const root = createRoot(document.getElementById("root")!);
-root.render(
-  <Sentry.ErrorBoundary>
-    <App />
-  </Sentry.ErrorBoundary>
-);
+root.render(<App />);
