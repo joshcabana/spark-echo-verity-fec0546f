@@ -20,7 +20,7 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <VerityLogo className="h-6 w-auto" linkTo="/" />
-            <span className="text-xs text-muted-foreground/50">
+            <span className="text-xs text-muted-foreground">
               © {new Date().getFullYear()}
             </span>
           </div>
@@ -39,13 +39,13 @@ const Footer = () => {
 
         {/* Trust signals */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 pt-6 border-t border-border/30">
-          <span className="text-xs text-muted-foreground/60">
+          <span className="text-xs text-muted-foreground">
             18+ verified · No raw video or audio stored
           </span>
           <span className="text-xs text-muted-foreground/40 hidden sm:inline">
             ·
           </span>
-          <span className="text-xs text-muted-foreground/60">
+          <span className="text-xs text-muted-foreground">
             🇦🇺 Built by one person in Australia
           </span>
         </div>
@@ -54,7 +54,7 @@ const Footer = () => {
         <div className="text-center mt-4">
           <a
             href="mailto:hello@getverity.com.au"
-            className="text-xs text-muted-foreground/50 hover:text-foreground transition-colors"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             hello@getverity.com.au
           </a>

@@ -41,7 +41,7 @@ const FeaturedDropPanel = ({ drop, errorMessage, isLoading = false }: FeaturedDr
     return (
       <div className="rounded-2xl border border-border bg-card/70 p-6 text-left backdrop-blur">
         <p className="mb-2 text-[11px] uppercase tracking-luxury text-primary/70">Next pilot Drop</p>
-        <h3 className="font-serif text-2xl text-foreground">Schedule publishing soon</h3>
+        <h2 className="font-serif text-2xl text-foreground">Schedule publishing soon</h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           {errorMessage ??
             "The public Drop feed is being wired up now. Production should not launch this page without a scheduled pilot Drop."}
