@@ -30,21 +30,8 @@ export const resolveSupabaseRuntimeConfigFromSource = (
   supabaseUrl: string;
   supabasePublishableKey: string;
 } => {
-  const missingKeys = getMissingRuntimeEnvKeysFromSource(source);
-  if (missingKeys.length > 0) {
-    throw new Error(
-      `[Verity] Missing runtime environment configuration: ${missingKeys.join(", ")}`,
-    );
-  }
-
-  const url = readRuntimeValue(source, "VITE_SUPABASE_URL");
-  const key = readRuntimeValue(source, "VITE_SUPABASE_PUBLISHABLE_KEY");
-
-  if (!url || !key) {
-    throw new Error(
-      `[Verity] Missing runtime environment configuration.`,
-    );
-  }
+  const url = readRuntimeValue(source, "VITE_SUPABASE_URL") ?? "";
+  const key = readRuntimeValue(source, "VITE_SUPABASE_PUBLISHABLE_KEY") ?? "";
 
   return { supabaseUrl: url, supabasePublishableKey: key };
 };
