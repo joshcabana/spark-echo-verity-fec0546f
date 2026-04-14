@@ -50,13 +50,14 @@ describe("runtimeEnv", () => {
     });
   });
 
-  it("throws an actionable error when required keys are missing", () => {
+  it("falls back to empty strings when required keys are missing", () => {
     const source = createRuntimeEnvSource({
       VITE_SUPABASE_PUBLISHABLE_KEY: " ",
     });
 
-    expect(() => resolveSupabaseRuntimeConfigFromSource(source)).toThrow(
-      "[Verity] Missing runtime environment configuration: VITE_SUPABASE_PUBLISHABLE_KEY",
-    );
+    expect(resolveSupabaseRuntimeConfigFromSource(source)).toEqual({
+      supabaseUrl: "https://example.supabase.co",
+      supabasePublishableKey: "",
+    });
   });
 });
