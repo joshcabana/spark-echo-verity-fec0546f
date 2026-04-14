@@ -1,70 +1,74 @@
 
 
-## What GetVerity.1 (the other Lovable project) has that this project could benefit from
+## What la45-site-optimised has that could benefit Verity
 
-Both repos are Vite/React Lovable projects for the same app. The other repo went through 6 phases of hardening. Here are the concrete improvements worth porting:
-
----
-
-### 1. In-memory rate limiting for edge functions (Security)
-
-The other repo has a `_shared/rate-limit.ts` utility that provides per-isolate sliding-window rate limiting. It is used in `find-match` (20 req/min), `agora-token` (10/min), `create-checkout` (5/min), `submit-appeal` (3/min), `delete-account` (2/hr), `export-my-data` (5/hr), and `spark-reflection-ai` (10/min).
-
-This project has a database-backed `rate-limit` edge function but does NOT use in-memory per-function rate limiting. The in-memory approach is complementary -- it catches abuse at the isolate level before hitting the database.
-
-**Change**: Create `supabase/functions/_shared/rate-limit.ts` and add `rateLimit()` guards to the 7 most sensitive edge functions.
+The LA45 repo is a **Next.js marketing site** — a completely different framework and project. Most code is not directly portable. However, there are three framework-agnostic techniques worth adopting:
 
 ---
 
-### 2. Sentry error monitoring (Observability)
+### 1. Accessibility: `prefers-reduced-motion` global reset (Quick win)
 
-The other repo has a lazy-loaded Sentry integration (`src/lib/sentry.ts`) that:
-- Dynamically imports `@sentry/react` to keep it off the critical path (454KB deferred)
-- Filters out browser extension and third-party errors
-- Wires into ErrorBoundary's `componentDidCatch`
-- Activates only when `VITE_SENTRY_DSN` is set (no-ops otherwise)
+LA45's `globals.css` includes a blanket reduced-motion override that disables all animations and transitions for users who prefer it. Verity's `index.css` has no such rule.
 
-This project has no error monitoring at all.
-
-**Change**: Add `@sentry/react` as a dependency, create `src/lib/sentry.ts` with lazy loading, wire it into `main.tsx` and `ErrorBoundary.tsx`, add the `vendor-sentry` chunk to vite config.
-
----
-
-### 3. Expanded Vite vendor chunks (Performance)
-
-The other repo splits 10 vendor chunks; this project only splits 4 (agora, motion, charts, router). Missing: `@tanstack/react-query`, `@radix-ui`, `react-helmet-async`, `@supabase`, `date-fns`, `@sentry`.
-
-**Change**: Add the missing `manualChunks` entries to `vite.config.ts` using a function-based approach (the other repo uses a function, which is more flexible than the static object this project uses).
+**Change**: Add to `src/index.css`:
+```css
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
 
 ---
 
-### 4. `Vary: Origin` header in CORS (Caching correctness)
+### 2. Accessibility: 44px minimum tap targets (Quick win)
 
-The other repo includes `"Vary": "Origin"` in CORS headers, which prevents CDN/browser caches from serving a response with the wrong `Access-Control-Allow-Origin` when multiple origins hit the same endpoint.
+LA45 enforces WCAG-compliant 44px minimum touch targets on all interactive elements globally. Verity relies on per-component sizing but has no global guarantee.
 
-This project's `_shared/cors.ts` does not include `Vary: Origin`.
+**Change**: Add to `src/index.css`:
+```css
+a, button, [role="button"], input[type="button"], input[type="submit"] {
+  min-height: 44px;
+  min-width: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+```
 
-**Change**: Add `"Vary": "Origin"` to the return value in `_shared/cors.ts`.
+---
+
+### 3. Performance: `content-visibility: auto` utility class (Quick win)
+
+LA45 uses a `.cv-auto` CSS class with `content-visibility: auto` to skip rendering of off-screen sections, improving initial paint time. This is a one-line utility that can be applied to below-the-fold landing page sections.
+
+**Change**: Add to `src/index.css`:
+```css
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
+}
+```
+Then apply `className="cv-auto"` to heavy below-the-fold sections in `Landing.tsx` (e.g. `FeaturesSection`, `HowItWorksSection`, `StatsSection`).
 
 ---
 
 ### What is NOT worth pulling
 
-- **`start-cloud-recording` / `stop-cloud-recording` / `generate-replay`** -- These are for Agora Cloud Recording which this project removed (recording columns were dropped in a previous migration). Not applicable.
-- **Auth gates on `send-push` and `aggregate-stats`** -- Would need to verify current implementations, but these are lower priority operational changes.
-- **`add_tokens` RPC for atomic token credits** -- This project already has a `deduct_tokens` RPC. The `add_tokens` counterpart in stripe-webhook is a nice-to-have but lower priority.
-- **Database indexes migration** -- The other repo added 7 indexes. This could help but requires checking which indexes already exist in this project's migrations.
+- **Security headers (CSP, HSTS, X-Frame-Options, Permissions-Policy)** — These are set via Next.js `headers()` config. In a Vite SPA, these must be configured at the hosting/CDN layer (Vercel, Cloudflare, etc.), not in application code. Not applicable here.
+- **Upstash rate limiting middleware** — LA45 uses `@upstash/ratelimit` in Next.js middleware. Verity already has in-memory rate limiting on its edge functions, which is the equivalent approach.
+- **`useInView` hook with throttled fallback** — Verity already uses framer-motion's `useInView` / `whileInView`. The LA45 version adds an IntersectionObserver fallback with throttled scroll listeners, but this is unnecessary since all modern browsers support IntersectionObserver.
+- **Glass/gold-vignette CSS effects** — Purely cosmetic and LA45-brand-specific.
 
 ---
 
 ### Technical details
 
-| Item | Files affected | Priority |
-|------|---------------|----------|
-| In-memory rate limiting | New: `supabase/functions/_shared/rate-limit.ts`, edit 7 edge functions | High |
-| Sentry integration | New: `src/lib/sentry.ts`, edit `main.tsx`, `ErrorBoundary.tsx`, `vite.config.ts`, `package.json` | Medium |
-| Vendor chunk splitting | Edit: `vite.config.ts` | Low (quick win) |
-| Vary: Origin header | Edit: `supabase/functions/_shared/cors.ts` (1 line) | Low (quick win) |
+| Item | Files affected | Effort |
+|------|---------------|--------|
+| Reduced-motion reset | `src/index.css` (add ~6 lines) | Trivial |
+| 44px tap targets | `src/index.css` (add ~5 lines) | Trivial |
+| content-visibility utility | `src/index.css` (add ~4 lines), `src/pages/Landing.tsx` (add class to sections) | Low |
 
-All changes are additive. The Sentry integration requires installing `@sentry/react` and optionally setting `VITE_SENTRY_DSN` as an environment variable.
+All changes are purely additive CSS. No dependencies, no migrations, no risk.
 
