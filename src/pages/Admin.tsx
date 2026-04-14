@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Shield, AlertTriangle, BarChart3, Users, Settings, Play, Ban,
-  MessageSquare, Check, X, TrendingUp, Activity, Eye, Search,
-  ChevronRight, Bell, Clock, Calendar, Plus, Pencil, Trash2
+  Shield, AlertTriangle, BarChart3, Users, Settings, Ban,
+  MessageSquare, Check, X, TrendingUp, Activity, Search,
+  Bell, Calendar, Plus, Pencil, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
