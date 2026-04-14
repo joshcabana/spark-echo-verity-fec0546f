@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -31,6 +32,10 @@ Deno.serve(async (req) => {
     });
   }
   const userId = claimsData.claims.sub as string;
+
+  // In-memory rate limit: 5 req/hr per user
+  const limited = rateLimitOrResponse(`export-my-data:${userId}`, 5, 3_600_000, corsHeaders);
+  if (limited) return limited;
 
   // Gather all user-owned data
   const [profile, trust, sparks, messages, reflections, vault, reports, appeals, transactions] =

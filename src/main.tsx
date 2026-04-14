@@ -2,6 +2,9 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import ConfigErrorScreen from "@/components/ConfigErrorScreen";
 import { getMissingRuntimeEnvKeys } from "@/lib/runtimeEnv";
+import { initSentry } from "@/lib/sentry";
+
+initSentry();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

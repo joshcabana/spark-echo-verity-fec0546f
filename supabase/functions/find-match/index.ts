@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -18,12 +19,15 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // User client to get auth user
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: { user }, error: userErr } = await userClient.auth.getUser();
     if (userErr || !user) throw new Error("Unauthorized");
+
+    // In-memory rate limit: 20 req/min per user
+    const limited = rateLimitOrResponse(`find-match:${user.id}`, 20, 60_000, corsHeaders);
+    if (limited) return limited;
 
     // Service role client for matching logic
     const admin = createClient(supabaseUrl, serviceKey);

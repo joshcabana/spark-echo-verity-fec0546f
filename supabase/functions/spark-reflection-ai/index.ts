@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -33,6 +34,10 @@ serve(async (req) => {
       });
     }
     const userId = claimsData.claims.sub as string;
+
+    // In-memory rate limit: 10 req/min per user
+    const limited = rateLimitOrResponse(`spark-reflection-ai:${userId}`, 10, 60_000, corsHeaders);
+    if (limited) return limited;
 
     const { call_id, feeling_score, liked_text, next_time_text } = await req.json();
 
