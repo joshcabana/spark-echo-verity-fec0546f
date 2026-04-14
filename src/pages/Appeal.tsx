@@ -61,7 +61,7 @@ const Appeal = () => {
         const { data: existingAppeal } = await supabase
           .from("appeals")
           .select("id")
-          .eq("moderation_event_id", flags[0].id)
+          .eq("flag_id", flags[0].id)
           .limit(1);
 
         if (cancelled) return;
@@ -73,7 +73,7 @@ const Appeal = () => {
       // Fetch past appeals
       const { data: appeals } = await supabase
         .from("appeals")
-        .select("id, appeal_text, status, created_at, resolution_text, moderation_event_id")
+        .select("id, explanation, status, created_at, admin_response, flag_id")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
@@ -300,7 +300,7 @@ const Appeal = () => {
                   className="rounded-lg border border-border bg-card p-5"
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
-                    <p className="text-sm text-foreground/80">{appeal.appeal_text ?? "No reason provided."}</p>
+                    <p className="text-sm text-foreground/80">{appeal.explanation ?? "No reason provided."}</p>
                     <Badge
                       variant="outline"
                       className={`text-[10px] flex-shrink-0 ${
@@ -321,9 +321,9 @@ const Appeal = () => {
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground/50 mb-2">{formatDate(appeal.created_at)}</p>
-                  {appeal.resolution_text && (
+                  {appeal.admin_response && (
                     <p className="text-xs text-muted-foreground/60 leading-relaxed italic">
-                      "{appeal.resolution_text}"
+                      "{appeal.admin_response}"
                     </p>
                   )}
                 </motion.div>
