@@ -1,3 +1,5 @@
+import { getSupabaseRuntimeConfig } from "@/lib/runtimeEnv";
+
 export interface AuthCapabilities {
   disableSignup: boolean;
   mailerAutoconfirm: boolean;
@@ -27,17 +29,12 @@ export const mapAuthSettingsToCapabilities = (settings: AuthSettingsResponse): A
 };
 
 export const fetchAuthCapabilities = async (): Promise<AuthCapabilities> => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!supabaseUrl || !anonKey) {
-    throw new Error("Missing Supabase URL or publishable key");
-  }
+  const { supabaseUrl, supabasePublishableKey } = getSupabaseRuntimeConfig();
 
   const response = await fetch(`${supabaseUrl}/auth/v1/settings`, {
     headers: {
-      apikey: anonKey,
-      Authorization: `Bearer ${anonKey}`,
+      apikey: supabasePublishableKey,
+      Authorization: `Bearer ${supabasePublishableKey}`,
     },
   });
 

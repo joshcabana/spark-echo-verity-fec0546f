@@ -30,6 +30,13 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks(id: string) {
           if (id.includes("agora-rtc-sdk-ng")) return "vendor-agora";
+          if (
+            id.includes("class-variance-authority") ||
+            id.includes("clsx") ||
+            id.includes("tailwind-merge")
+          ) {
+            return "vendor-ui";
+          }
           if (id.includes("framer-motion")) return "vendor-motion";
           if (id.includes("recharts")) return "vendor-charts";
           if (id.includes("react-router-dom")) return "vendor-router";

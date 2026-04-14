@@ -181,11 +181,17 @@ Package manager policy: `npm` is the canonical toolchain for local dev and CI.
 # Install dependencies
 npm install
 
+# Validate release env contract
+npm run check:runtime-env
+
 # Start dev server
 npm run dev
 
 # Run tests
 npm test
+
+# Run release smoke checks
+npm run test:smoke
 
 # Lint
 npm run lint
@@ -197,6 +203,7 @@ npm run build
 ### Auth Provider Policy
 
 - Canonical Cloud project: `nhpbxlvogqnqutmflwlk`
+- Preview/production env contract: `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` must be non-empty before build/publish
 - Runtime policy source: `public.app_config` row `key='auth_policy'`
 - Phone verification mode: `value_json.require_phone_verification` (served via `get-feature-flags`)
 - Phase 4 feature toggles: `value_json.enable_replay_vault`, `enable_friendfluence`, `enable_voice_intro`, `enable_guardian_net`

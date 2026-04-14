@@ -14,7 +14,7 @@ export default defineConfig({
     ],
     exclude: [
       "node_modules/**",
-      "supabase/functions/**/index.test.ts",
+      "supabase/functions/**/*.integration.ts",
     ],
   },
   resolve: {
