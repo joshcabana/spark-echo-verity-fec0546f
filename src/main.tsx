@@ -2,6 +2,8 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { initSentry } from "@/lib/sentry";
+import ConfigErrorScreen from "@/components/ConfigErrorScreen";
+import { getMissingRuntimeEnvKeys } from "@/lib/runtimeEnv";
 
 initSentry();
 
@@ -14,4 +16,10 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 }
 
 const root = createRoot(document.getElementById("root")!);
-root.render(<App />);
+
+const missingKeys = getMissingRuntimeEnvKeys();
+if (missingKeys.length > 0) {
+  root.render(<ConfigErrorScreen missingKeys={missingKeys} />);
+} else {
+  root.render(<App />);
+}
