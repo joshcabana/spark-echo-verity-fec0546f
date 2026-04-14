@@ -1,66 +1,70 @@
 
 
-## What the GitHub repo (`verity-app`) has that this Lovable project could benefit from
+## What GetVerity.1 (the other Lovable project) has that this project could benefit from
 
-After comparing both codebases, here is what is worth pulling over. The GitHub repo is a Next.js version of the same app — most component code is framework-specific and not portable. But there are three concrete wins:
-
----
-
-### 1. Banned user check in `find-match` (Security fix)
-
-The GitHub repo has a critical safety fix: `find-match` selects `banned_at` from `user_trust` and blocks suspended users from entering the matchmaking queue. This project's version does NOT check `banned_at`.
-
-**Change**: Add `banned_at` to the select in `find-match/index.ts` and throw `"Account suspended"` if set.
+Both repos are Vite/React Lovable projects for the same app. The other repo went through 6 phases of hardening. Here are the concrete improvements worth porting:
 
 ---
 
-### 2. `collect-product-event` edge function (Product analytics)
+### 1. In-memory rate limiting for edge functions (Security)
 
-This project created the `product_events` table but has no edge function to write to it. The GitHub repo has a full `collect-product-event` function with:
-- Allowlisted event names (30+ events covering the entire funnel)
-- Public vs authenticated event distinction
-- Session ID support
-- Milestone tracking (auto-stamps `first_call_at`, `first_rsvp_at`, etc. on profiles)
-- Input validation and type safety
+The other repo has a `_shared/rate-limit.ts` utility that provides per-isolate sliding-window rate limiting. It is used in `find-match` (20 req/min), `agora-token` (10/min), `create-checkout` (5/min), `submit-appeal` (3/min), `delete-account` (2/hr), `export-my-data` (5/hr), and `spark-reflection-ai` (10/min).
 
-**Change**: Port the function as a new edge function `supabase/functions/collect-product-event/index.ts`, updated to use the shared `getCorsHeaders` helper.
+This project has a database-backed `rate-limit` edge function but does NOT use in-memory per-function rate limiting. The in-memory approach is complementary -- it catches abuse at the isolate level before hitting the database.
+
+**Change**: Create `supabase/functions/_shared/rate-limit.ts` and add `rateLimit()` guards to the 7 most sensitive edge functions.
 
 ---
 
-### 3. `rate-limit` edge function (Abuse prevention)
+### 2. Sentry error monitoring (Observability)
 
-The GitHub repo has a `rate-limit` edge function that uses a `check_rate_limit` database RPC for sliding-window rate limiting by user or IP. This project does not have this function or the underlying DB function.
+The other repo has a lazy-loaded Sentry integration (`src/lib/sentry.ts`) that:
+- Dynamically imports `@sentry/react` to keep it off the critical path (454KB deferred)
+- Filters out browser extension and third-party errors
+- Wires into ErrorBoundary's `componentDidCatch`
+- Activates only when `VITE_SENTRY_DSN` is set (no-ops otherwise)
 
-**Change**: Port `rate-limit/index.ts` as a new edge function, and create a migration for the `check_rate_limit` database function if it doesn't already exist.
+This project has no error monitoring at all.
+
+**Change**: Add `@sentry/react` as a dependency, create `src/lib/sentry.ts` with lazy loading, wire it into `main.tsx` and `ErrorBoundary.tsx`, add the `vendor-sentry` chunk to vite config.
 
 ---
 
-### 4. OG/Twitter meta tags (SEO)
+### 3. Expanded Vite vendor chunks (Performance)
 
-The GitHub repo has proper OpenGraph and Twitter Card meta tags. This project's `index.html` has none — no `og:title`, `og:description`, `og:image`, or `twitter:card` tags.
+The other repo splits 10 vendor chunks; this project only splits 4 (agora, motion, charts, router). Missing: `@tanstack/react-query`, `@radix-ui`, `react-helmet-async`, `@supabase`, `date-fns`, `@sentry`.
 
-**Change**: Add OG and Twitter meta tags to `index.html` using the existing `/og-logo.png` asset.
+**Change**: Add the missing `manualChunks` entries to `vite.config.ts` using a function-based approach (the other repo uses a function, which is more flexible than the static object this project uses).
+
+---
+
+### 4. `Vary: Origin` header in CORS (Caching correctness)
+
+The other repo includes `"Vary": "Origin"` in CORS headers, which prevents CDN/browser caches from serving a response with the wrong `Access-Control-Allow-Origin` when multiple origins hit the same endpoint.
+
+This project's `_shared/cors.ts` does not include `Vary: Origin`.
+
+**Change**: Add `"Vary": "Origin"` to the return value in `_shared/cors.ts`.
 
 ---
 
 ### What is NOT worth pulling
 
-- **V-mark logo assets** — The Lovable project already has its own favicon set (`favicon-32.png`, `favicon-192.png`, `favicon-512.png`). The V-mark PNGs from the other repo are for the Next.js version's manifest.
-- **Next.js components** — Different framework (Next.js App Router vs Vite/React Router). Not portable.
-- **Vercel Analytics/Speed Insights** — Vercel-specific packages, not applicable here.
-- **Loading skeletons** — This project already has its own skeleton components.
-- **Homepage/page.tsx** — This project already has a more mature landing page with multiple sections.
+- **`start-cloud-recording` / `stop-cloud-recording` / `generate-replay`** -- These are for Agora Cloud Recording which this project removed (recording columns were dropped in a previous migration). Not applicable.
+- **Auth gates on `send-push` and `aggregate-stats`** -- Would need to verify current implementations, but these are lower priority operational changes.
+- **`add_tokens` RPC for atomic token credits** -- This project already has a `deduct_tokens` RPC. The `add_tokens` counterpart in stripe-webhook is a nice-to-have but lower priority.
+- **Database indexes migration** -- The other repo added 7 indexes. This could help but requires checking which indexes already exist in this project's migrations.
 
 ---
 
 ### Technical details
 
-| Item | Files affected |
-|------|---------------|
-| Banned user check | `supabase/functions/find-match/index.ts` (add `banned_at` to select + guard) |
-| collect-product-event | New: `supabase/functions/collect-product-event/index.ts` |
-| rate-limit | New: `supabase/functions/rate-limit/index.ts` + migration for `check_rate_limit` RPC |
-| OG meta tags | `index.html` (add 6-8 meta tags in `<head>`) |
+| Item | Files affected | Priority |
+|------|---------------|----------|
+| In-memory rate limiting | New: `supabase/functions/_shared/rate-limit.ts`, edit 7 edge functions | High |
+| Sentry integration | New: `src/lib/sentry.ts`, edit `main.tsx`, `ErrorBoundary.tsx`, `vite.config.ts`, `package.json` | Medium |
+| Vendor chunk splitting | Edit: `vite.config.ts` | Low (quick win) |
+| Vary: Origin header | Edit: `supabase/functions/_shared/cors.ts` (1 line) | Low (quick win) |
 
-All changes are additive except the `find-match` fix, which modifies one existing file.
+All changes are additive. The Sentry integration requires installing `@sentry/react` and optionally setting `VITE_SENTRY_DSN` as an environment variable.
 
