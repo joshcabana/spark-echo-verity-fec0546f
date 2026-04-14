@@ -19,10 +19,13 @@ const ALLOWED_EVENTS = new Set([
   // Drops & Lobby
   "drop_viewed",
   "drop_rsvp",
+  "drop_rsvp_created",
   "drop_rsvp_cancelled",
+  "drop_checked_in",
   "lobby_entered",
   "matchmaking_started",
   "matchmaking_cancelled",
+  "match_found",
   // Calls
   "call_started",
   "call_ended",
@@ -54,6 +57,7 @@ const ALLOWED_EVENTS = new Set([
   "account_deleted",
   // Landing
   "landing_viewed",
+  "landing_primary_cta_clicked",
   "waitlist_joined",
   "cta_clicked",
   // Vault
@@ -61,6 +65,8 @@ const ALLOWED_EVENTS = new Set([
   "replay_watched",
   // Reflection
   "reflection_submitted",
+  // Reports
+  "report_submitted",
 ]);
 
 serve(async (req) => {

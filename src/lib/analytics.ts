@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export const ANALYTICS_EVENTS = {
   callStarted: "call_started",
   dropCheckedIn: "drop_checked_in",
@@ -21,6 +23,38 @@ declare global {
   }
 }
 
+// Stable session ID for the current browser tab
+let _sessionId: string | null = null;
+function getSessionId(): string {
+  if (!_sessionId) {
+    _sessionId = crypto.randomUUID();
+  }
+  return _sessionId;
+}
+
+/**
+ * Fire-and-forget send to the collect-product-event edge function.
+ * Failures are silently logged — analytics should never break the app.
+ */
+function sendToBackend(name: string, properties: AnalyticsPayload): void {
+  supabase.functions
+    .invoke("collect-product-event", {
+      body: {
+        event_name: name,
+        properties,
+        session_id: getSessionId(),
+      },
+    })
+    .then(({ error }) => {
+      if (error) {
+        console.debug("[analytics] backend send failed:", error.message);
+      }
+    })
+    .catch(() => {
+      // swallow — analytics must never throw
+    });
+}
+
 export function trackEvent(name: AnalyticsEventName, properties: AnalyticsPayload = {}): void {
   if (typeof window === "undefined") {
     return;
@@ -35,6 +69,9 @@ export function trackEvent(name: AnalyticsEventName, properties: AnalyticsPayloa
       },
     }),
   );
+
+  // Send to backend
+  sendToBackend(name, properties);
 
   if (typeof window.plausible === "function") {
     window.plausible(name, { props: properties });
