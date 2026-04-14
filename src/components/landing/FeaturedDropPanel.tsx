@@ -75,7 +75,7 @@ const FeaturedDropPanel = ({ drop, errorMessage, isLoading = false }: FeaturedDr
         </div>
       </div>
 
-      <h3 className="font-serif text-2xl text-foreground">{drop.title}</h3>
+      <h2 className="font-serif text-2xl text-foreground">{drop.title}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
         {drop.description ||
           "A verified, structured pilot Drop for early members who want one honest night of real chemistry."}
