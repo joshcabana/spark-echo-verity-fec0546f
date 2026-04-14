@@ -3,7 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { getSupabaseRuntimeConfig } from '@/lib/runtimeEnv';
 
-const { supabaseUrl, supabasePublishableKey } = getSupabaseRuntimeConfig();
+let { supabaseUrl, supabasePublishableKey } = getSupabaseRuntimeConfig();
+
+// If config is genuinely missing, we use a placeholder immediately here 
+// so the import doesn't throw a fatal JS error before ConfigErrorScreen can render.
+if (!supabaseUrl || !supabasePublishableKey) {
+  supabaseUrl = "https://missing-config.supabase.co";
+  supabasePublishableKey = "missing-config-key";
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

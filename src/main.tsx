@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import App from "./App";
+import { lazy, Suspense } from "react";
 import "./index.css";
 import { initSentry } from "@/lib/sentry";
 import ConfigErrorScreen from "@/components/ConfigErrorScreen";
@@ -21,5 +21,18 @@ const missingKeys = getMissingRuntimeEnvKeys();
 if (missingKeys.length > 0) {
   root.render(<ConfigErrorScreen missingKeys={missingKeys} />);
 } else {
-  root.render(<App />);
+  // Lazy-import App so the supabase client (which throws on empty URL)
+  // is never loaded when the config guard above has already triggered.
+  const App = lazy(() => import("./App"));
+  root.render(
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <App />
+    </Suspense>,
+  );
 }
