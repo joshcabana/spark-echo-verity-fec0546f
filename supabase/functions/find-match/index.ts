@@ -34,11 +34,12 @@ serve(async (req) => {
     // Server-side trust gate: verify user has completed identity checks
     const { data: trust, error: trustErr } = await admin
       .from("user_trust")
-      .select("selfie_verified, safety_pledge_accepted, phone_verified")
+      .select("selfie_verified, safety_pledge_accepted, phone_verified, banned_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (trustErr || !trust) throw new Error("Trust verification failed");
+    if (trust.banned_at) throw new Error("Account suspended");
     if (!trust.selfie_verified || !trust.safety_pledge_accepted) {
       throw new Error("Identity verification incomplete");
     }
@@ -212,6 +213,7 @@ serve(async (req) => {
       "Trust verification failed",
       "Identity verification incomplete",
       "Phone verification required",
+      "Account suspended",
     ];
     const msg = safeMessages.includes(errorMessage) ? errorMessage : "An error occurred";
     return new Response(
