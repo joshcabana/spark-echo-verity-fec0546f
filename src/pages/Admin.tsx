@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Shield, AlertTriangle, BarChart3, Users, Settings, Play, Ban,
-  MessageSquare, Check, X, TrendingUp, Activity, Eye, Search,
-  ChevronRight, Bell, Clock, Calendar, Plus, Pencil, Trash2
+  Shield, AlertTriangle, BarChart3, Users, Settings, Ban,
+  MessageSquare, Check, X, TrendingUp, Activity, Search,
+  Bell, Calendar, Plus, Pencil, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,20 +39,25 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
 const formatRuntimeAlert = (alert: Tables<"runtime_alert_events">) => {
-  if (isRecord(alert.details)) {
+  if (isRecord(alert.metadata)) {
     for (const key of ["message", "error", "summary", "detail"]) {
-      const candidate = alert.details[key];
+      const candidate = (alert.metadata as Record<string, unknown>)[key];
       if (typeof candidate === "string" && candidate.trim()) {
         return candidate;
       }
     }
+    const source = typeof (alert.metadata as Record<string, unknown>).event_source === "string"
+      ? ((alert.metadata as Record<string, unknown>).event_source as string).replace(/_/g, " ")
+      : null;
+    const event = typeof (alert.metadata as Record<string, unknown>).event_type === "string"
+      ? ((alert.metadata as Record<string, unknown>).event_type as string).replace(/_/g, " ")
+      : null;
+    const sc = (alert.metadata as Record<string, unknown>).status_code;
+    const status = typeof sc === "number" ? `HTTP ${sc}` : null;
+    return [event, source, status].filter(Boolean).join(" · ") || alert.message;
   }
 
-  const source = alert.event_source.replace(/_/g, " ");
-  const event = alert.event_type.replace(/_/g, " ");
-  const status = typeof alert.status_code === "number" ? `HTTP ${alert.status_code}` : null;
-
-  return [event, source, status].filter(Boolean).join(" · ");
+  return alert.message;
 };
 
 const PilotMetrics = () => {
@@ -651,7 +656,7 @@ const Admin = () => {
                       {appeals.map((appeal) => (
                         <TableRow key={appeal.id}>
                           <TableCell className="font-mono text-xs text-muted-foreground">{appeal.user_id.slice(0, 8)}</TableCell>
-                          <TableCell className="text-muted-foreground text-sm max-w-xs truncate">{appeal.appeal_text ?? "No reason provided"}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm max-w-xs truncate">{appeal.explanation ?? "No reason provided"}</TableCell>
                           <TableCell className="text-muted-foreground/60 text-sm">{new Date(appeal.created_at).toLocaleDateString()}</TableCell>
                           <TableCell>
                             <Badge
