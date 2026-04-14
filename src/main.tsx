@@ -6,14 +6,6 @@ import { initSentry } from "@/lib/sentry";
 
 initSentry();
 
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    tracesSampleRate: 0.2,
-    replaysOnErrorSampleRate: 1.0,
-  });
-}
-
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").catch((err) => {
