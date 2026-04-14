@@ -14,8 +14,4 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 }
 
 const root = createRoot(document.getElementById("root")!);
-root.render(
-  <Sentry.ErrorBoundary>
-    <App />
-  </Sentry.ErrorBoundary>
-);
+root.render(<App />);
