@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const urlRegex = /^https?:\/\/.{1,2000}$/;
@@ -27,6 +28,11 @@ serve(async (req) => {
     const { data: { user }, error: userErr } = await supabase.auth.getUser();
     if (userErr || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    const limited = rateLimitOrResponse(`submit-appeal:${user.id}`, 3, 60_000, corsHeaders);
+    if (limited) {
+      return limited;
     }
 
     const body = await req.json();

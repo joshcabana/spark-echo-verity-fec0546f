@@ -3,6 +3,9 @@ import * as Sentry from "@sentry/react";
 import "./index.css";
 import ConfigErrorScreen from "@/components/ConfigErrorScreen";
 import { getMissingRuntimeEnvKeys } from "@/lib/runtimeEnv";
+import { initSentry } from "@/lib/sentry";
+
+initSentry();
 
 // ---------- Sentry ----------
 if (import.meta.env.VITE_SENTRY_DSN) {

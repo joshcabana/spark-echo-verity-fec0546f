@@ -1,22 +1,19 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { getCorsHeaders } from "../_shared/cors.ts"
 
-const DEFAULT_ORIGIN = "https://getverity.com.au"
-const ALLOWED_ORIGINS = new Set([
-  DEFAULT_ORIGIN,
-  "http://localhost:5173",
-  "http://localhost:8080",
-  "capacitor://localhost",
+const PUBLIC_EVENTS = new Set([
+  "landing_cta_clicked",
+  "landing_viewed",
 ])
 
-const buildCorsHeaders = (origin: string | null) => ({
-  "Access-Control-Allow-Origin":
-    origin && ALLOWED_ORIGINS.has(origin) ? origin : DEFAULT_ORIGIN,
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-})
-
-const PUBLIC_EVENTS = new Set(["landing_cta_clicked", "landing_viewed"])
+const LEGACY_EVENT_ALIASES = {
+  call_started: "call_connected",
+  landing_primary_cta_clicked: "landing_cta_clicked",
+  lobby_entered: "lobby_viewed",
+  pass_chosen: "pass_submitted",
+  spark_chosen: "spark_submitted",
+} as const
 
 const VALID_EVENTS = new Set([
   "appeal_submitted",
@@ -82,7 +79,7 @@ const isAnalyticsProperties = (value: unknown): value is AnalyticsProperties => 
 }
 
 serve(async (req) => {
-  const corsHeaders = buildCorsHeaders(req.headers.get("origin"))
+  const corsHeaders = getCorsHeaders(req)
 
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders })
@@ -91,8 +88,9 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
 
-    if (!supabaseUrl || !anonKey) {
+    if (!supabaseUrl || !anonKey || !serviceRoleKey) {
       return new Response(
         JSON.stringify({ error: "Supabase client configuration is missing" }),
         {
@@ -103,13 +101,14 @@ serve(async (req) => {
     }
 
     const authHeader = req.headers.get("Authorization")
-    const supabase = createClient(
+    const authClient = createClient(
       supabaseUrl,
       anonKey,
       authHeader?.startsWith("Bearer ")
         ? { global: { headers: { Authorization: authHeader } } }
         : {},
     )
+    const adminClient = createClient(supabaseUrl, serviceRoleKey)
 
     let userId: string | null = null
 
@@ -117,7 +116,7 @@ serve(async (req) => {
       const {
         data: { user },
         error: userError,
-      } = await supabase.auth.getUser()
+      } = await authClient.auth.getUser()
 
       if (!userError && user) {
         userId = user.id
@@ -127,6 +126,8 @@ serve(async (req) => {
     const body = (await req.json()) as Record<string, unknown>
     const eventName =
       typeof body.event_name === "string" ? body.event_name.trim() : ""
+    const normalizedEventName =
+      LEGACY_EVENT_ALIASES[eventName as keyof typeof LEGACY_EVENT_ALIASES] ?? eventName
 
     if (!eventName) {
       return new Response(
@@ -138,7 +139,7 @@ serve(async (req) => {
       )
     }
 
-    if (!VALID_EVENTS.has(eventName)) {
+    if (!VALID_EVENTS.has(normalizedEventName)) {
       return new Response(
         JSON.stringify({ error: `Unknown event: ${eventName}` }),
         {
@@ -181,7 +182,7 @@ serve(async (req) => {
       )
     }
 
-    if (!userId && !PUBLIC_EVENTS.has(eventName)) {
+    if (!userId && !PUBLIC_EVENTS.has(normalizedEventName)) {
       return new Response(
         JSON.stringify({ error: "Authentication required" }),
         {
@@ -192,8 +193,8 @@ serve(async (req) => {
     }
 
     const properties = rawProperties ?? {}
-    const { error: insertError } = await supabase.from("product_events").insert({
-      event_name: eventName,
+    const { error: insertError } = await adminClient.from("product_events").insert({
+      event_name: normalizedEventName,
       properties,
       session_id: sessionId,
       user_id: userId,
@@ -211,10 +212,10 @@ serve(async (req) => {
     }
 
     const milestoneColumn =
-      MILESTONE_COLUMNS[eventName as keyof typeof MILESTONE_COLUMNS]
+      MILESTONE_COLUMNS[normalizedEventName as keyof typeof MILESTONE_COLUMNS]
 
     if (milestoneColumn && userId) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await adminClient
         .from("profiles")
         .update({ [milestoneColumn]: new Date().toISOString() })
         .eq("user_id", userId)
@@ -239,7 +240,7 @@ serve(async (req) => {
       {
         status: 500,
         headers: {
-          ...buildCorsHeaders(req.headers.get("origin")),
+          ...getCorsHeaders(req),
           "Content-Type": "application/json",
         },
       },

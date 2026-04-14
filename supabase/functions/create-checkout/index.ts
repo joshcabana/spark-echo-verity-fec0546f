@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 const ALLOWED_ORIGINS = [
   "https://getverity.com.au",
@@ -50,6 +51,11 @@ serve(async (req) => {
         JSON.stringify({ error: "Unauthorized" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    const limited = rateLimitOrResponse(`create-checkout:${user.id}`, 5, 60_000, corsHeaders);
+    if (limited) {
+      return limited;
     }
 
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");

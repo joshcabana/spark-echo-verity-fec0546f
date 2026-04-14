@@ -1952,6 +1952,7 @@ export type Database = {
       user_trust: {
         Row: {
           age_verified: boolean
+          banned_at: string | null
           created_at: string
           id: string
           onboarding_complete: boolean
@@ -1965,6 +1966,7 @@ export type Database = {
         }
         Insert: {
           age_verified?: boolean
+          banned_at?: string | null
           created_at?: string
           id?: string
           onboarding_complete?: boolean
@@ -1978,6 +1980,7 @@ export type Database = {
         }
         Update: {
           age_verified?: boolean
+          banned_at?: string | null
           created_at?: string
           id?: string
           onboarding_complete?: boolean
@@ -2529,6 +2532,14 @@ export type Database = {
             Returns: string
           }
       check_notification_cap: { Args: { p_user_id: string }; Returns: boolean }
+      check_rate_limit: {
+        Args: {
+          p_key: string
+          p_max_requests: number
+          p_window_seconds: number
+        }
+        Returns: Json
+      }
       claim_match_candidate: {
         Args: { p_drop_id: string; p_user_id: string }
         Returns: {

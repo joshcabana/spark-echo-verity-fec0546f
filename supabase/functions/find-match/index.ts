@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -25,6 +26,9 @@ serve(async (req) => {
     const { data: { user }, error: userErr } = await userClient.auth.getUser();
     if (userErr || !user) throw new Error("Unauthorized");
 
+    const limited = rateLimitOrResponse(`find-match:${user.id}`, 20, 60_000, corsHeaders);
+    if (limited) return limited;
+
     // Service role client for matching logic
     const admin = createClient(supabaseUrl, serviceKey);
 
@@ -34,11 +38,12 @@ serve(async (req) => {
     // Server-side trust gate: verify user has completed identity checks
     const { data: trust, error: trustErr } = await admin
       .from("user_trust")
-      .select("selfie_verified, safety_pledge_accepted, phone_verified")
+      .select("selfie_verified, safety_pledge_accepted, phone_verified, banned_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (trustErr || !trust) throw new Error("Trust verification failed");
+    if (trust.banned_at) throw new Error("Account suspended");
     if (!trust.selfie_verified || !trust.safety_pledge_accepted) {
       throw new Error("Identity verification incomplete");
     }
@@ -212,6 +217,7 @@ serve(async (req) => {
       "Trust verification failed",
       "Identity verification incomplete",
       "Phone verification required",
+      "Account suspended",
     ];
     const msg = safeMessages.includes(errorMessage) ? errorMessage : "An error occurred";
     return new Response(

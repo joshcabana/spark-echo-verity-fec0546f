@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getCorsHeaders } from "../_shared/cors.ts";
 
 const RATE_LIMIT_POLICIES = {
   default: {
@@ -25,7 +21,11 @@ interface RateLimitResponse {
   reset_at: string;
 }
 
-function jsonResponse(body: unknown, init: ResponseInit = {}) {
+function jsonResponse(
+  body: unknown,
+  corsHeaders: Record<string, string>,
+  init: ResponseInit = {},
+) {
   return new Response(JSON.stringify(body), {
     ...init,
     headers: {
@@ -46,6 +46,8 @@ function getRequestIdentity(req: Request): string | null {
 }
 
 serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -60,7 +62,11 @@ serve(async (req: Request) => {
     const scope = payload.scope ?? "default";
 
     if (!(scope in RATE_LIMIT_POLICIES)) {
-      return jsonResponse({ error: "Unsupported rate limit scope" }, { status: 400 });
+      return jsonResponse(
+        { error: "Unsupported rate limit scope" },
+        corsHeaders,
+        { status: 400 },
+      );
     }
 
     const authHeader = req.headers.get("Authorization");
@@ -81,7 +87,11 @@ serve(async (req: Request) => {
     }
 
     if (!identity) {
-      return jsonResponse({ error: "Unable to determine request identity" }, { status: 400 });
+      return jsonResponse(
+        { error: "Unable to determine request identity" },
+        corsHeaders,
+        { status: 400 },
+      );
     }
 
     const { maxRequests, windowSeconds } = RATE_LIMIT_POLICIES[scope];
@@ -98,15 +108,19 @@ serve(async (req: Request) => {
 
     const { allowed, remaining, reset_at } = data as RateLimitResponse;
 
-    return jsonResponse({ allowed, remaining, reset_at, scope }, {
-      status: allowed ? 200 : 429,
-      headers: {
-        "X-RateLimit-Limit": String(maxRequests),
-        "X-RateLimit-Remaining": String(remaining),
-        "X-RateLimit-Reset": reset_at,
+    return jsonResponse(
+      { allowed, remaining, reset_at, scope },
+      corsHeaders,
+      {
+        status: allowed ? 200 : 429,
+        headers: {
+          "X-RateLimit-Limit": String(maxRequests),
+          "X-RateLimit-Remaining": String(remaining),
+          "X-RateLimit-Reset": reset_at,
+        },
       },
-    });
+    );
   } catch (error) {
-    return jsonResponse({ error: String(error) }, { status: 500 });
+    return jsonResponse({ error: String(error) }, corsHeaders, { status: 500 });
   }
 });
