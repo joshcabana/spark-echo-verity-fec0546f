@@ -22,11 +22,11 @@ interface ModerationFlag {
 
 interface PastAppeal {
   id: string;
-  appeal_text: string | null;
+  explanation: string | null;
   status: "pending" | "upheld" | "denied";
   created_at: string;
-  resolution_text: string | null;
-  moderation_event_id: string;
+  admin_response: string | null;
+  flag_id: string | null;
 }
 
 const Appeal = () => {
