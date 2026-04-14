@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req);
@@ -32,6 +33,10 @@ Deno.serve(async (req) => {
     });
   }
   const userId = claimsData.claims.sub as string;
+
+  // In-memory rate limit: 2 req/hr per user
+  const limited = rateLimitOrResponse(`delete-account:${userId}`, 2, 3_600_000, corsHeaders);
+  if (limited) return limited;
 
   // Clean up public schema data via SECURITY DEFINER RPC
   const { error: rpcError } = await supabase.rpc("delete_my_account");

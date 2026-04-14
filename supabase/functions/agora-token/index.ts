@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { RtcTokenBuilder, RtcRole } from "npm:agora-token@2.0.4";
 import { getCorsHeaders } from "../_shared/cors.ts";
+import { rateLimitOrResponse } from "../_shared/rate-limit.ts";
 
 function generateUid(): number {
   return Math.floor(Math.random() * 100000) + 1;
@@ -37,6 +38,10 @@ serve(async (req) => {
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // In-memory rate limit: 10 req/min per user
+    const limited = rateLimitOrResponse(`agora-token:${user.id}`, 10, 60_000, corsHeaders);
+    if (limited) return limited;
 
     const { call_id, channel } = await req.json();
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
