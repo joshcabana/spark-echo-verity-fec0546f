@@ -185,14 +185,38 @@ serve(async (req) => {
             stripe_session_id: session.id,
           });
         } else if (entitlement?.tier) {
-          const expiresAt = new Date();
-          expiresAt.setMonth(expiresAt.getMonth() + (entitlement.annual ? 12 : 1));
+          // Use Stripe's authoritative current_period_end for subscription expiry.
+          // Fallback to a local estimate only if the subscription isn't yet available.
+          let expiresAt: string | null = null;
+
+          const subscriptionId =
+            typeof session.subscription === "string"
+              ? session.subscription
+              : session.subscription?.id ?? null;
+
+          if (subscriptionId) {
+            try {
+              const sub = await stripe.subscriptions.retrieve(subscriptionId);
+              expiresAt = sub.current_period_end
+                ? new Date(sub.current_period_end * 1000).toISOString()
+                : null;
+            } catch (subErr) {
+              console.error("Failed to retrieve subscription for expiry:", subErr);
+            }
+          }
+
+          // Fallback: estimate from server clock if Stripe lookup failed.
+          if (!expiresAt) {
+            const estimated = new Date();
+            estimated.setMonth(estimated.getMonth() + (entitlement.annual ? 12 : 1));
+            expiresAt = estimated.toISOString();
+          }
 
           await supabase
             .from("profiles")
             .update({
               subscription_tier: entitlement.tier,
-              subscription_expires_at: expiresAt.toISOString(),
+              subscription_expires_at: expiresAt,
             })
             .eq("user_id", profile.user_id);
         }

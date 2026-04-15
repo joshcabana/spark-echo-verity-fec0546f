@@ -281,7 +281,8 @@ const TokenShop = () => {
                   )
                 }
               >
-                {loadingPriceId?.startsWith("price_pass") ? (
+                {(loadingPriceId === "price_1T6rZjC1O032lUHcZiPWdPg7" ||
+                  loadingPriceId === "price_1T6rawC1O032lUHcywgSq3ft") ? (
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
                 Subscribe to Verity Pass

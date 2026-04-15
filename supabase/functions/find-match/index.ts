@@ -36,9 +36,10 @@ serve(async (req) => {
     if (!drop_id || !room_id) throw new Error("drop_id and room_id required");
 
     // Server-side trust gate: verify user has completed identity checks
+    // Fetch trust record AND preferences (interested_in).
     const { data: trust, error: trustErr } = await admin
       .from("user_trust")
-      .select("selfie_verified, safety_pledge_accepted, phone_verified, banned_at")
+      .select("selfie_verified, safety_pledge_accepted, phone_verified, banned_at, preferences")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -60,6 +61,17 @@ serve(async (req) => {
       throw new Error("Phone verification required");
     }
 
+    // Fetch user's gender from their profile (used for preference-aware matching).
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("gender")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const userGender = profile?.gender ?? null;
+    const interestedIn =
+      ((trust.preferences as Record<string, unknown> | null)?.interested_in as string | null) ?? null;
+
     // Verify drop exists and is live
     const { data: drop, error: dropErr } = await admin
       .from("drops")
@@ -76,11 +88,20 @@ serve(async (req) => {
       }
     }
 
-    // Join queue without mutating an already-existing row (important for polling safety).
+    // Join queue — snapshot gender/interest so the atomic RPC can match without joins.
+    // ignoreDuplicates: true means an existing waiting row is NOT overwritten (safe for polling).
     const { error: joinErr } = await admin
       .from("matchmaking_queue")
       .upsert(
-        { user_id: user.id, room_id, drop_id, status: "waiting", joined_at: new Date().toISOString() },
+        {
+          user_id: user.id,
+          room_id,
+          drop_id,
+          status: "waiting",
+          joined_at: new Date().toISOString(),
+          user_gender: userGender,
+          interested_in: interestedIn,
+        },
         { onConflict: "user_id,drop_id", ignoreDuplicates: true }
       );
     if (joinErr) {

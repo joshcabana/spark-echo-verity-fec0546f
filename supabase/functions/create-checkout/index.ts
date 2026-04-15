@@ -81,7 +81,7 @@ serve(async (req) => {
 
     // Build URLs server-side from allowlisted origins
     const origin = req.headers.get("origin") || "";
-    const safeOrigin = ALLOWED_ORIGINS.includes(origin) || origin.endsWith(".vercel.app") ? origin : ALLOWED_ORIGINS[0];
+    const safeOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
     const success_url = `${safeOrigin}/tokens?success=true`;
     const cancel_url = `${safeOrigin}/tokens`;
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Shield, User, RefreshCw, MonitorCheck } from "lucide-react";
+import { Shield, User, RefreshCw, MonitorCheck, Coins } from "lucide-react";
 import VerityLogo from "@/components/VerityLogo";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,9 +33,10 @@ interface Drop {
 }
 
 const Lobby = () => {
-  const { user, userTrust } = useAuth();
+  const { user, userTrust, profile } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const { data: authCapabilities } = useAuthCapabilities();
   const { data: featureFlags } = useFeatureFlags();
   const requirePhoneVerificationEnabled = featureFlags?.requirePhoneVerification ?? true;
@@ -55,6 +56,14 @@ const Lobby = () => {
     userTrust?.selfie_verified &&
     userTrust?.safety_pledge_accepted
   );
+
+  const isPassHolder =
+    profile?.subscription_tier === "pass_monthly" ||
+    profile?.subscription_tier === "pass_annual";
+  const showLowTokenNudge =
+    !nudgeDismissed &&
+    !isPassHolder &&
+    (profile?.token_balance ?? 1) === 0;
 
   // Fetch drops
   const { data: drops = [], isLoading: dropsLoading } = useQuery<Drop[]>({
@@ -314,6 +323,35 @@ const Lobby = () => {
           <div className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-200">
             Continuity mode is active: phone verification is temporarily optional while the SMS provider is offline.
           </div>
+        )}
+        {showLowTokenNudge && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="mb-6 flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/[0.04] px-4 py-3"
+          >
+            <div className="flex items-center gap-2 text-sm">
+              <Coins className="w-4 h-4 text-primary flex-shrink-0" />
+              <span className="text-muted-foreground">
+                You're out of tokens.{" "}
+                <button
+                  onClick={() => navigate("/tokens")}
+                  className="text-primary underline underline-offset-2 hover:no-underline"
+                >
+                  Top up to extend sparks
+                </button>
+                .
+              </span>
+            </div>
+            <button
+              onClick={() => setNudgeDismissed(true)}
+              className="text-muted-foreground/40 hover:text-muted-foreground text-lg leading-none flex-shrink-0"
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </motion.div>
         )}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
           className="mb-6">

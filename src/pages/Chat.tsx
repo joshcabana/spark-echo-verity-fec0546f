@@ -11,6 +11,7 @@ import TypingIndicator from "@/components/chat/TypingIndicator";
 import ChatComposer from "@/components/chat/ChatComposer";
 import VoiceIntroBanner from "@/components/chat/VoiceIntroBanner";
 import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
+import { NextDropCountdown } from "@/components/NextDropCountdown";
 
 const TYPING_TIMEOUT = 3000;
 
@@ -252,8 +253,9 @@ const Chat = () => {
           </p>
         )}
         {messages.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-sm text-muted-foreground">You sparked! Say hello.</p>
+          <div className="flex flex-col items-center gap-4 py-10">
+            <p className="text-sm text-muted-foreground">You sparked! Say hello to {partnerName}.</p>
+            <NextDropCountdown />
           </div>
         )}
         {messages.map((msg, i) => (

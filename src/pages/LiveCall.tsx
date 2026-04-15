@@ -18,6 +18,8 @@ import SparkReflection from "@/components/call/SparkReflection";
 import { useAgoraCall } from "@/hooks/useAgoraCall";
 import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 import { isModerationFlagged } from "@/lib/moderation";
+import { NextDropCountdown } from "@/components/NextDropCountdown";
+import { NextDropCountdown } from "@/components/NextDropCountdown";
 
 type CallPhase =
   | "loading"
@@ -567,7 +569,7 @@ const LiveCall = () => {
         {/* NO SPARK */}
         {phase === "no-spark" && (
           <motion.div key="no-spark" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="flex-1 flex flex-col items-center justify-center gap-6 px-6">
+            className="flex-1 flex flex-col items-center justify-center gap-6 px-6 overflow-y-auto">
             <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} transition={{ duration: 0.6 }}
               className="text-center">
               <p className="font-serif text-2xl md:text-3xl text-foreground mb-3">
@@ -578,10 +580,11 @@ const LiveCall = () => {
               </p>
             </motion.div>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-              className="flex flex-col items-center gap-3">
+              className="flex flex-col items-center gap-3 w-full">
+              <NextDropCountdown />
               <button onClick={() => setPhase("reflection")}
-                className="text-sm text-primary hover:text-primary/80 transition-colors">
-                Continue
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors mt-2">
+                View reflection
               </button>
             </motion.div>
           </motion.div>
