@@ -36,8 +36,8 @@ const ProtectedRoute = ({ children, requireAdmin = false, requireTrust = false }
     }
   }
 
-  // Enforce onboarding completion (except when already on onboarding)
-  if (!onboardingComplete && !location.pathname.startsWith("/onboarding")) {
+  // Enforce onboarding completion (except when already on onboarding or quiz)
+  if (!onboardingComplete && !location.pathname.startsWith("/onboarding") && !location.pathname.startsWith("/quiz")) {
     return <Navigate to="/onboarding" replace />;
   }
 

@@ -7,10 +7,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import ExcitementStep from "@/components/onboarding/ExcitementStep";
 import MagicLinkStep from "@/components/onboarding/MagicLinkStep";
 import VerifyStep from "@/components/onboarding/VerifyStep";
+import ProfileStep from "@/components/onboarding/ProfileStep";
+import PreferencesStep, { Preferences } from "@/components/onboarding/PreferencesStep";
 import { ANALYTICS_EVENTS, trackEvent } from "@/lib/analytics";
 
-const TOTAL_STEPS = 3;
-const STEP_KEYS = ["excitement", "magic_link", "verify"] as const;
+const TOTAL_STEPS = 5;
+const STEP_KEYS = ["excitement", "magic_link", "verify", "profile", "preferences"] as const;
 
 const getStepKey = (stepIndex: number) => STEP_KEYS[stepIndex] ?? STEP_KEYS[0];
 
@@ -39,12 +41,21 @@ const Onboarding = () => {
       navigate("/lobby", { replace: true });
       return;
     }
-    // If user is already authenticated, skip to verify step
+    
+    // Resume at the saved step if available
+    if (userTrust?.onboarding_step && step === 0) {
+      const savedStep = Math.min(userTrust.onboarding_step, TOTAL_STEPS - 1);
+      // Only advance if the saved step is further than current
+      if (savedStep > step) {
+        setStep(savedStep);
+      }
+    }
+    
+    // Auto-advance past auth steps if already authenticated
     if (user && step < 2) {
       setStep(2);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userTrust, user, navigate]);
+  }, [userTrust, user, navigate, step]);
 
   const saveStep = async (nextStep: number) => {
     if (!user) return;
@@ -68,7 +79,6 @@ const Onboarding = () => {
 
   const handleExcitementDone = () => {
     trackStepCompleted(0);
-    // If already signed in, skip magic link
     if (user) {
       void saveStep(2);
       setStep(2);
@@ -85,10 +95,36 @@ const Onboarding = () => {
 
   const handleVerifyDone = () => {
     trackStepCompleted(2);
-    navigate("/lobby", { replace: true });
+    void saveStep(3);
+    setStep(3);
   };
 
-  const progress = ((step + 1) / TOTAL_STEPS) * 100;
+  const handleProfileDone = () => {
+    trackStepCompleted(3);
+    void saveStep(4);
+    setStep(4);
+  };
+
+  const handlePreferencesDone = async (prefs: Preferences) => {
+    if (!user) return;
+    trackStepCompleted(4);
+    
+    // Save preferences to user_trust
+    const { error } = await supabase.from("user_trust").update({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- preferences is a jsonb column not yet reflected in the generated types
+      preferences: prefs as any,
+      onboarding_step: 5 // Logic for "post-onboarding steps"
+    }).eq("user_id", user.id);
+
+    if (error) {
+       console.error("Failed to save preferences", error);
+    }
+
+    // Finally navigate to quiz
+    navigate("/quiz", { replace: true });
+  };
+
+  const progress = ((step) / TOTAL_STEPS) * 100;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -109,6 +145,8 @@ const Onboarding = () => {
           {step === 0 && <ExcitementStep key="excitement" onNext={handleExcitementDone} />}
           {step === 1 && <MagicLinkStep key="magic-link" onNext={handleMagicLinkDone} />}
           {step === 2 && <VerifyStep key="verify" onComplete={handleVerifyDone} />}
+          {step === 3 && <ProfileStep key="profile" onNext={handleProfileDone} />}
+          {step === 4 && <PreferencesStep key="preferences" onComplete={handlePreferencesDone} />}
         </AnimatePresence>
       </div>
     </div>

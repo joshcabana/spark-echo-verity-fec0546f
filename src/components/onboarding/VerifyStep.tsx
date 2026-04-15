@@ -110,7 +110,6 @@ const VerifyStep = ({ onComplete }: VerifyStepProps) => {
       safety_pledge_accepted: true,
       
       onboarding_step: 3,
-      onboarding_complete: true,
     }, { onConflict: "user_id" });
     trackEvent(ANALYTICS_EVENTS.onboardingCompleted, {
       next_drop_id: nextDrop?.id ?? null,

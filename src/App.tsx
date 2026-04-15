@@ -18,6 +18,7 @@ import { Navigate } from "react-router-dom";
 const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const Quiz = lazy(() => import("./pages/Quiz"));
 const Lobby = lazy(() => import("./pages/Lobby"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -75,6 +76,7 @@ const App = () => (
                     <Route path="/" element={<Landing />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/quiz" element={<ProtectedRoute><Quiz /></ProtectedRoute>} />
                     <Route path="/lobby" element={<ProtectedRoute requireTrust><Lobby /></ProtectedRoute>} />
                     <Route path="/call/:callId" element={<ProtectedRoute requireTrust><LiveCall /></ProtectedRoute>} />
                     <Route path="/sparks" element={<ProtectedRoute requireTrust><SparkHistory /></ProtectedRoute>} />
